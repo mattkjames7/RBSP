@@ -1,5 +1,7 @@
 from .. import Globals
 import PyFileIO as pf
+import os
+import numpy as np
 
 def _ReadSPDF(sc='a'):
 	'''
@@ -26,6 +28,24 @@ def _ReadSPDF(sc='a'):
 		print('SPDF data for spacecraft "{:s}" not found'.format(sc))
 		return np.recarray(0,dtype=dtype)
 
-	data = pf.ReadASCIIData(fname,False,57,dtype=dtype)
+	#data = pf.ReadASCIIData(fname,False,57,dtype=dtype)
+	#read the file manually
+	print('Reading file')
+	f = open(fname,'r')
+	lines = f.readlines()
+	f.close()
 	
+	print('Creating output array')
+	skip = 57
+	nl = len(lines)
+	n = nl - skip
+	data = np.recarray(n,dtype=dtype)
+	nc = 33
+	
+	for i in range(0,n):
+		print('\rCopying data into array {:6.2f}%'.format(100.0*(i+1)/n),end='')
+		s = lines[i+skip].split()
+		for j in range(0,nc):
+			data[dtype[j][0]][i] = np.array(s[j]).astype(dtype[j][1])
+	print()
 	return data
