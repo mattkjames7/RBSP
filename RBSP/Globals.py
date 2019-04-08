@@ -7,3 +7,7 @@ try:
 except:
 	print('Please set RBSP_PATH environment variable')
 	DataPath = ''
+
+#RBSP position
+aPos = None
+bPos = None
