@@ -22,8 +22,7 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 			('GltN','float32'),('GltS','float32'),('MltE','float32'),('Lshell','float32'),
 			('FlLen','float32'),('Xgse','float32'),('Ygse','float32'),('Zgse','float32'),
 			('Xgsm','float32'),('Ygsm','float32'),('Zgsm','float32'),
-			('Xsm','float32'),('Ysm','float32'),('Zsm','float32'),
-			('Bx','float32'),('By','float32'),('Bz','float32')]
+			('Xsm','float32'),('Ysm','float32'),('Zsm','float32')]
 	
 	if use.size == 0:
 		print('No position data for rbsp{:s} on {:d}'.format(sc,Date))
@@ -36,6 +35,31 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	T = gp.TraceField(pos.Xsm,pos.Ysm,pos.Zsm,pos.Date,pos.ut,Model=Model,CoordIn='SM',Verbose=Verbose)
 	
 	#insert data into output array
+	out.Date = pos.Date
+	out.ut = pos.ut
+	out.MlatN = T.MlatN
+	out.MlatS = T.MlatS
+	out.GlatN = T.GlatN
+	out.GlatS = T.GlatS
+	out.MlonN = T.MlonN
+	out.MlonS = T.MlonS
+	out.GlonN = T.GlonN
+	out.GlonS = T.GlonS
+	out.MltN = T.MltN
+	out.MltS = T.MltS
+	out.GltN = T.GltN
+	out.GltS = T.GltS
+	out.MltE = T.MltE
+	out.Lshell = T.Lshell
+	out.FlLen = T.FlLen
+	out.Xgse = pos.Xgse
+	out.Ygse = pos.Ygse
+	out.Zgse = pos.Zgse
+	out.Xgsm = pos.Xgsm
+	out.Ygsm = pos.Ygsm
+	out.Zgsm = pos.Zgsm
+	out.Xsm = pos.Xsm
+	out.Ysm = pos.Ysm
+	out.Zsm = pos.Zsm
 	
-	return T
-	
+	return out
