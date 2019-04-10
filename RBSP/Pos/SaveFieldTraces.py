@@ -4,6 +4,7 @@ from .TraceFieldDay import TraceFieldFootprintsDay
 import DateTimeTools as TT
 from .GetPos import GetPos
 import os
+import numpy as np
 
 def SaveFieldFootprintTraces(sc='a',Model='T96',StartDate=20120830,EndDate=20190408,Verbose=True,Overwrite=False):
 	'''
@@ -24,7 +25,7 @@ def SaveFieldFootprintTraces(sc='a',Model='T96',StartDate=20120830,EndDate=20190
 
 	#set the output path
 	outpath = Globals.DataPath + 'Traces/{:s}/{:s}/'.format(Model,sc)
-	if not os.path.ispath(outpath):
+	if not os.path.isdir(outpath):
 		os.system('mkdir -pv '+outpath)
 	
 	#loop throught the dates doing the traces
