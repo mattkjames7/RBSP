@@ -3,17 +3,17 @@ import numpy as np
 import PyFileIO as pf
 import os
 
-def _ReadDataIndex(sc='a',L='l3'):
+def _ReadDataIndex(sc='a',Inst='hope',L='l3.moments'):
 	'''
 	Reads index file containing a list of all of the dates with their
 	associated data file name (so that we can pick the version 
 	automatically).
 	'''
 	#define the dtype
-	dtype = [('Date','int32'),('FileName','object'),('Version','int8')]
+	dtype = [('Date','int32'),('FileName','object'),('Version','int16')]
 	
 	#find the file
-	fname = Globals.DataPath+'EFW/{:s}.{:s}.dat'.format(L,sc)
+	fname = Globals.DataPath+'ECT/{:s}.{:s}.{:s}.dat'.format(Inst,L,sc)
 	
 	#check it exists
 	if not os.path.isfile(fname):

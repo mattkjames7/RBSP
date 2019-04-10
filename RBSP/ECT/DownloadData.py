@@ -39,7 +39,7 @@ def DownloadData(sc='a',Inst='hope',L='l3.moments',StartYear=2012,EndYear=2019,O
 		urls,fnames = _GetCDFURL(Years[i],sc,Inst,L)
 		nu = np.size(urls)
 		
-		idx = _ReadDataIndex(sc,L)
+		idx = _ReadDataIndex(sc,Inst,L)
 		new_idx = np.recarray(nu,dtype=idx.dtype)
 		new_idx.Date[:] = -1
 		p = 0
@@ -97,6 +97,6 @@ def DownloadData(sc='a',Inst='hope',L='l3.moments',StartYear=2012,EndYear=2019,O
 		idx_out = RT.JoinRecarray(idx,new_idx)
 		srt = np.argsort(idx_out.Date)
 		idx_out = idx_out[srt]
-		_UpdateDataIndex(idx_out,sc,L)
+		_UpdateDataIndex(idx_out,sc,Inst,L)
 		
 			
