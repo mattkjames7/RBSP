@@ -1,7 +1,7 @@
 import numpy as np
 from .. import Globals
 import DateTimeTools as TT
-
+import RecarrayTools as RT
 def ReadFieldFootprintTraces(Date,sc='a',Model='T96'):
 	'''
 	Reads the footprint trace files.
@@ -20,14 +20,16 @@ def ReadFieldFootprintTraces(Date,sc='a',Model='T96'):
 		n = np.size(dates)
 	else:
 		dates = Date
+		n = 1
+	print(dates)
 		
 	#now to list the files
 	path = Globals.DataPath+'Traces/{:s}/{:s}/'.format(Model,sc)
 	fpatt = path + '{:08d}.bin'
-	files = np.array(n,dtype='object')
-	
+	files = np.array((n,),dtype='object')
+	print(files)
 	for i in range(0,n):
-		files[i] = path + fpatt.format(dates[i])
+		files[i] = fpatt.format(dates[i])
 		
 	#open each file to count the total number of records to load
 	nt = 0
