@@ -1,11 +1,0 @@
---2019-04-10 16:56:26--  http://rbsp.space.umn.edu/data/rbsp/rbspa/l3/2013/rbspa_efw-l3_20130704_v01.cdf
-Resolving rbsp.space.umn.edu (rbsp.space.umn.edu)... 128.101.218.25
-Connecting to rbsp.space.umn.edu (rbsp.space.umn.edu)|128.101.218.25|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 1458693 (1.4M) [application/x-netcdf]
-Saving to: ‘/media/data1/Data/Testing/RBSP/EFW/l3/a/rbspa_efw-l3_20130704_v01.cdf’
-
-          /media/data1/Data/T  30%[=============>                                  ] 436.00K   351KB/s                        /media/data1/Data/Te  48%[======================>                         ] 693.40K   464KB/s                       /media/data1/Data/Tes  66%[==============================>                 ] 948.00K   542KB/s                      /media/data1/Data/Test  84%[=======================================>        ]   1.18M   601KB/s               /media/data1/Data/Testing/RBS 100%[===============================================>]   1.39M   654KB/s    in 2.2s    
-
-2019-04-10 16:56:28 (654 KB/s) - ‘/media/data1/Data/Testing/RBSP/EFW/l3/a/rbspa_efw-l3_20130704_v01.cdf’ saved [1458693/1458693]
-
