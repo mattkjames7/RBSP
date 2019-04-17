@@ -3,6 +3,7 @@ import numpy as np
 import pysatCDF
 import fnmatch as fnm
 import os as os
+from ..Tools.CDFtoRecarray import CDFtoRecarray
 
 def ReadData(Date,sc='a',L=4):
 	'''
@@ -10,7 +11,7 @@ def ReadData(Date,sc='a',L=4):
 	'''
 	
 	path = Globals.DataPath+'EMFISIS/L{:d}/{:s}/'.format(L,sc)
-	pattern = '*{:08d}*.cdf'format(Date)
+	pattern = '*{:08d}*.cdf'.format(Date)
 	
 	#list the files in the path first
 	files = np.array(os.listdir(path))
@@ -27,6 +28,8 @@ def ReadData(Date,sc='a',L=4):
 	#read the data
 	cdf = pysatCDF.CDF(path+files[good])
 	
+	#convert to recarray
+	data,meta = CDFtoRecarray(cdf)
 	
-	return cdf
+	return data,meta
 	
