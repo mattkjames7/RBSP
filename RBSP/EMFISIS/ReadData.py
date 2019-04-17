@@ -23,11 +23,16 @@ def ReadData(Date,sc='a',L=4):
 		if fnm.fnmatch(files[i],pattern):
 			matches[i] = True
 	
+	if not (matches == True).any():
+		return None,None
 	good = np.where(matches == True)[0][-1]
 	
 	#read the data
-	cdf = pysatCDF.CDF(path+files[good])
-	
+	try:
+		cdf = pysatCDF.CDF(path+files[good])
+	except:
+		print('Failed to read CDF file')
+		return None,None
 	#convert to recarray
 	data,meta = CDFtoRecarray(cdf)
 	
