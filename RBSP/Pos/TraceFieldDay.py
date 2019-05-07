@@ -66,6 +66,6 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	Rs = np.sqrt(pos.Xsm**2 + pos.Ysm**2 + pos.Zsm**2)
 	Rt = np.sqrt(T.x**2 + T.y**2 + T.z**2)
 	out.Rmax = np.nanmax(Rt,axis=1)
-	out.Rnorm = Rs/Rmax
+	out.Rnorm = Rs/out.Rmax
 	
 	return out
