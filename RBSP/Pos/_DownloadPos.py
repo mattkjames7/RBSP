@@ -7,7 +7,7 @@ def _DownloadPos():
 	'''
 
 	arch = ['https://github.com/mattkjames7/RBSP/raw/master/DATA/rbspa.bin.bz2',
-			'https://github.com/mattkjames7/RBSP/raw/master/DATA/rbspa.bin.bz2']
+			'https://github.com/mattkjames7/RBSP/raw/master/DATA/rbspb.bin.bz2']
 	
 	#firstly, let's check what exists
 	Path = Globals.DataPath+'Pos/'
