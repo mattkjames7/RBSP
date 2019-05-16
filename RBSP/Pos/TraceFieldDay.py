@@ -65,7 +65,20 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	
 	Rs = np.sqrt(pos.Xsm**2 + pos.Ysm**2 + pos.Zsm**2)
 	Rt = np.sqrt(T.x**2 + T.y**2 + T.z**2)
-	out.Rmax = np.nanmax(Rt,axis=1)
+	
+	for i in range(0,n):
+		if np.isfinite(T.MltE[i]):
+			xsm,ysm,zsm = gp.GSMtoSMUT(T.x[i],T.y[i],T.z[i],out.Date[i],out.ut[i])
+			if np.nanmin(T.x[i]) < -10.0:
+				R = np.sqrt(T.x[i]**2 + T.y[i]**2 + T.z[i]**2)
+			else:
+				R = np.sqrt(xsm**2 + ysm**2)
+			u = np.where(R == np.nanmax(R))[0][0]
+			out.Rmax[i] = R[u]
+		else:
+			out.Rmax[i] = np.nan
+	
+#	out.Rmax = np.nanmax(Rt,axis=1)
 	out.Rnorm = Rs/out.Rmax
 	
 	return out
