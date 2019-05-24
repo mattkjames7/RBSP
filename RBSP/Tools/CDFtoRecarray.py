@@ -19,8 +19,9 @@ def CDFtoRecarray(cdf):
 			dtkey = keys[i]
 			dtype.append(('Date','int32'))
 			dtype.append(('ut','float32'))
+			break
 		else:
-			dtype.append((keys[i],cdf.data[keys[i]].dtype))
+			dtype.append((keys[i],cdf.data[keys[i]].dtype,cdf.data[keys[i]].shape))
 			
 	
 	#find the length
