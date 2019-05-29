@@ -1,0 +1,11 @@
+--2019-04-10 13:52:57--  https://emfisis.physics.uiowa.edu/Flight/RBSP-A/L4/2014/01/23/
+Resolving emfisis.physics.uiowa.edu (emfisis.physics.uiowa.edu)... 128.255.96.16, 2620:0:e50:6810::80ff:6010
+Connecting to emfisis.physics.uiowa.edu (emfisis.physics.uiowa.edu)|128.255.96.16|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [text/html]
+Saving to: ‘/media/data/Data/Testing/RBSP/tmp/1554900777.1319768.tmp’
+
+     0K                                                        10.9M=0s
+
+2019-04-10 13:52:57 (10.9 MB/s) - ‘/media/data/Data/Testing/RBSP/tmp/1554900777.1319768.tmp’ saved [847]
+
