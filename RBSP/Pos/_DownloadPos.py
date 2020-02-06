@@ -1,6 +1,12 @@
 import os
 from .. import Globals
 
+
+
+'''
+Should change this function to download the position from
+https://emfisis.physics.uiowa.edu/Flight/RBSP-A/LANL/MagEphem/
+'''
 def _DownloadPos():
 	'''
 	Downloads position data and extracts it to RBSP_PATH/Pos. 

@@ -16,7 +16,7 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	use = np.where(pos.Date == Date)[0]
 
 	#define the dtype
-	dtype=[('Date','int32'),('ut','float32'),('MlatN','float32'),('MlatS','float32'),
+	dtype=[('Date','int32'),('ut','float32'),('utc','float64'),('MlatN','float32'),('MlatS','float32'),
 			('GlatN','float32'),('GlatS','float32'),('MlonN','float32'),('MlonS','float32'),
 			('GlonN','float32'),('GlonS','float32'),('MltN','float32'),('MltS','float32'),
 			('GltN','float32'),('GltS','float32'),('MltE','float32'),('Lshell','float32'),
@@ -38,6 +38,7 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	#insert data into output array
 	out.Date = pos.Date
 	out.ut = pos.ut
+	out.utc = pos.utc
 	out.MlatN = T.MlatN
 	out.MlatS = T.MlatS
 	out.GlatN = T.GlatN
@@ -68,7 +69,7 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	
 	for i in range(0,n):
 		if np.isfinite(T.MltE[i]):
-			xsm,ysm,zsm = gp.GSMtoSMUT(T.x[i],T.y[i],T.z[i],out.Date[i],out.ut[i])
+			xsm,ysm,zsm = gp.GSMtoSM(T.x[i],T.y[i],T.z[i],out.Date[i],out.ut[i])
 			if np.nanmin(T.x[i]) < -10.0:
 				R = np.sqrt(T.x[i]**2 + T.y[i]**2 + T.z[i]**2)
 			else:
