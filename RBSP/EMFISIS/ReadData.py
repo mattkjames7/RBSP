@@ -24,7 +24,7 @@ def ReadData(Date,sc='a',L=4):
 			matches[i] = True
 	
 	if not (matches == True).any():
-		return None,None
+		return None,'nofile'
 	good = np.where(matches == True)[0][-1]
 	
 	#read the data
@@ -32,7 +32,7 @@ def ReadData(Date,sc='a',L=4):
 		cdf = pysatCDF.CDF(path+files[good])
 	except:
 		print('Failed to read CDF file')
-		return None,None
+		return None,'badfile'
 	#convert to recarray
 	data,meta = CDFtoRecarray(cdf)
 	

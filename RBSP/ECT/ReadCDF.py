@@ -16,8 +16,12 @@ def ReadCDF(Date,sc='a',Inst='hope',L='l3.moments'):
 	use = np.where(idx.Date == Date)[0]
 	if use.size == 0:
 		print('Date not found')
-		return None
+		return None,'nofile'
 	
 	fname = path + idx[use[0]].FileName
-	cdf = pysatCDF.CDF(fname)
+	try:
+		cdf = pysatCDF.CDF(fname)
+	except:
+		print('Failed to read CDF file')
+		return None,'badfile'
 	return cdf.data,cdf.meta

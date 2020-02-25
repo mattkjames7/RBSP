@@ -5,7 +5,7 @@ from ._GetCDFURL import _GetCDFURL
 import os
 
 
-def DownloadData(sc='a',L=4,StartDate=20120830,EndDate=20190408,Overwrite=False):
+def DownloadData(sc='a',L=4,StartDate=20120830,EndDate=20200101,Overwrite=False):
 	'''
 	Downloads EMFISIS data.
 	

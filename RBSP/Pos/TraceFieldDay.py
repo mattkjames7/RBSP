@@ -20,7 +20,7 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 			('GlatN','float32'),('GlatS','float32'),('MlonN','float32'),('MlonS','float32'),
 			('GlonN','float32'),('GlonS','float32'),('MltN','float32'),('MltS','float32'),
 			('GltN','float32'),('GltS','float32'),('MltE','float32'),('Lshell','float32'),
-			('FlLen','float32'),('Rmax','float32'),('Rnorm','float32'),
+			('FlLen','float32'),('Rmax','float32'),('Rnorm','float32'),('Tilt','float32'),
 			('Xgse','float32'),('Ygse','float32'),('Zgse','float32'),
 			('Xgsm','float32'),('Ygsm','float32'),('Zgsm','float32'),
 			('Xsm','float32'),('Ysm','float32'),('Zsm','float32')]
@@ -31,10 +31,10 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	pos = pos[use]
 	n = pos.size
 	out = np.recarray(n,dtype=dtype)
-	
+	print(pos[-1])
 	#do the tracing
 	T = gp.TraceField(pos.Xsm,pos.Ysm,pos.Zsm,pos.Date,pos.ut,Model=Model,CoordIn='SM',Verbose=Verbose)
-	
+	print(T.MlatN)
 	#insert data into output array
 	out.Date = pos.Date
 	out.ut = pos.ut
@@ -63,23 +63,25 @@ def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
 	out.Xsm = pos.Xsm
 	out.Ysm = pos.Ysm
 	out.Zsm = pos.Zsm
+	out.Tilt = gp.GetDipoleTilt(out.Date,out.ut)
 	
 	Rs = np.sqrt(pos.Xsm**2 + pos.Ysm**2 + pos.Zsm**2)
 	Rt = np.sqrt(T.x**2 + T.y**2 + T.z**2)
 	
-	for i in range(0,n):
-		if np.isfinite(T.MltE[i]):
-			xsm,ysm,zsm = gp.GSMtoSM(T.x[i],T.y[i],T.z[i],out.Date[i],out.ut[i])
-			if np.nanmin(T.x[i]) < -10.0:
-				R = np.sqrt(T.x[i]**2 + T.y[i]**2 + T.z[i]**2)
-			else:
-				R = np.sqrt(xsm**2 + ysm**2)
-			u = np.where(R == np.nanmax(R))[0][0]
-			out.Rmax[i] = R[u]
-		else:
-			out.Rmax[i] = np.nan
+	# for i in range(0,n):
+		# if np.isfinite(T.MltE[i]):
+			# xsm,ysm,zsm = gp.GSMtoSM(T.x[i],T.y[i],T.z[i],out.Date[i],out.ut[i])
+			# if np.nanmin(T.x[i]) < -10.0:
+				# R = np.sqrt(T.x[i]**2 + T.y[i]**2 + T.z[i]**2)
+			# else:
+				# R = np.sqrt(xsm**2 + ysm**2)
+			# u = np.where(R == np.nanmax(R))[0][0]
+			# out.Rmax[i] = R[u]
+		# else:
+			# out.Rmax[i] = np.nan
 	
 #	out.Rmax = np.nanmax(Rt,axis=1)
+	out.Rmax = out.Lshell
 	out.Rnorm = Rs/out.Rmax
 	
 	return out
