@@ -1,8 +1,9 @@
 import numpy as np
 from .. import Globals
-from ..Tools.CDFtoRecarray import CDFtoRecarray
-from ._ReadDataIndex import _ReadDataIndex
-import pysatCDF
+from ..Tools.Downloading._ReadDataIndex import _ReadDataIndex
+from ..Tools.ReadCDF import ReadCDF as RCDF
+from . import _EFW
+import os
 
 def ReadCDF(Date,sc='a',L='l3'):
 	'''
@@ -10,14 +11,27 @@ def ReadCDF(Date,sc='a',L='l3'):
 	
 	'''
 	
-	idx = _ReadDataIndex(sc,L)
-	path = Globals.DataPath+'EFW/{:s}/{:s}/'.format(L,sc)
-
+	#read the data index
+	idx = _ReadDataIndex(_EFW.idxfname.format(L,sc))
+	
+	#check the index for the appropriate date
 	use = np.where(idx.Date == Date)[0]
 	if use.size == 0:
-		print('Date not found')
-		return None
+		print('Date not found, run RBSP.EFW.DownloadData() to check for updates.')
+		return None,None
+	idx = idx[use]
+	mx = np.where(idx.Version  == np.max(idx.Version))[0]
+	mx = mx[0]
 	
-	fname = path + idx[use[0]].FileName
-	cdf = pysatCDF.CDF(fname)
-	return cdf.data,cdf.meta
+	#get the file name
+	fname = _EFW.datapath.format(L,sc) + idx[mx].FileName
+
+
+	#check file exists
+	if not os.path.isfile(fname):
+		print('Index is broken: Update the data index')
+		return None,None
+		
+	#read the file
+	return RCDF(fname)
+
