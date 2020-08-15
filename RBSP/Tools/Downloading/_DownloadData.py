@@ -11,13 +11,13 @@ from ._ExtractDateVersion import _ExtractDateVersion
 from ._ReduceDownloadList import _ReduceDownloadList
 from ..ListDates import ListDates
 
-def _DownloadData(url0,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Overwrite=False,Progress=False):
+def _DownloadData(URLF,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Overwrite=False,Progress=False):
 	'''
 	Downloads Arase data
 
 	Inputs
 	======
-	url0 : string
+	url0 : function
 		Base URL of the data repository
 	fname : string
 		Full path and file name of index file
@@ -41,77 +41,97 @@ def _DownloadData(url0,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Ove
 		dates = ListDates(Date[0],Date[1])
 	else:
 		dates = np.array([Date]).flatten()
+	n = dates.size
 	
-	#populate the list of dates to trace first
-	yymm = dates//100
-	yymm = np.unique(yymm)
-	Years = yymm//100
-	Months = yymm % 100
-	n = yymm.size
-
-	
-	#create output path if it doesn't exist
-	if not os.path.isdir(outpath):
-		os.system('mkdir -pv '+outpath)
-		
-	#loop through each remaining date and start downloading
+	#get a list of base URLS to scan
+	urls0 = np.zeros(n,dtype='object')
 	for i in range(0,n):
-		print('Year {0}'.format(Years[i]))
-		urls,fnames = _GetCDFURL(Years[i],Months[i],url0)
-
+		print('\rDetermining URLs, date {0} of {1}'.format(i+1,n),end='')
+		urls0[i] = URLF(dates[i])
+	print()
+	
+	#get the unique ones
+	uurl0,inverse = np.unique(urls0,return_inverse=True)
+	nu0 = np.size(uurl0)
 		
+	#create an array of cdf urls and file names
+	urls = []
+	fnames = []
+	for i in range(0,nu0):
+		print('\rScanning for CDF URLs {0} of {1}'.format(i+1,nu0),end='')
+		#use = np.where(inverse == i)[0]
+		_urls,_fnames = _GetCDFURL(uurl0[i])
+		urls.append(_urls)
+		fnames.append(_fnames)
+	print()
+	urls = np.concatenate(urls)
+	fnames = np.concatenate(fnames)
+	nu = urls.size
+	
+	if nu == 0:
+		print('No CDF URLs found')
+		return
+	else:
+		print('{:d} CDF URLs found'.format(nu))
 		
-		nu = np.size(urls)
+	#find file name dates and versions
+	print('Parsing file dates and versions')
+	fDate,Ver = _ExtractDateVersion(fnames,vfmt)
+	
+	#reduce the lists 
+	idx = _ReadDataIndex(fname)
+	urls,fnames,fDate,Ver = _ReduceDownloadList(urls,fnames,fDate,Ver,idx,dates,Overwrite)
+	nu = urls.size
+	
+	if nu == 0:
+		print('No files to download')
+		return 
+	else:
+		print('{:d} files to download'.format(nu))
 		
-		if nu > 0:
-			idx = _ReadDataIndex(fname)
-			new_idx = np.recarray(nu,dtype=idx.dtype)
-			new_idx.Date[:] = -1
+	#create new output index
+	new_idx = np.recarray(nu,dtype=idx.dtype)
+	new_idx.Date[:] = -1
 
-			fDate,Ver = _ExtractDateVersion(fnames,vfmt)
-			urls,fnames,fDate,Ver = _ReduceDownloadList(urls,fnames,fDate,Ver,idx,dates,Overwrite)
-			nu = np.size(urls)
+	#start downloading files
+	p = 0
+	for j in range(0,nu):
+		print('Downloading file {0} of {1} ({2})'.format(j+1,nu,fnames[j]))
 
-			p = 0
-			for j in range(0,nu):
-				print('Downloading file {0} of {1} ({2})'.format(j+1,nu,fnames[j]))
-
-				if Progress:
-					os.system('wget '+urls[j]+' -O '+outpath+fnames[j])
-				else:
-					os.system('wget --no-verbose '+urls[j]+' -O '+outpath+fnames[j])
-
-				new_idx.Date[p] = fDate[j]
-				new_idx.FileName[p] = fnames[j]
-				new_idx.Version[p] = Ver[j]
-				p+=1
-					
-			new_idx = new_idx[:p]
-			
-			
-			#check for duplicates within old index
-			usen = np.ones(p,dtype='bool')
-			useo = np.ones(idx.size,dtype='bool')
+		if Progress:
+			os.system('wget '+urls[j]+' -O '+outpath+fnames[j])
+		else:
+			os.system('wget --no-verbose '+urls[j]+' -O '+outpath+fnames[j])
+		new_idx.Date[p] = fDate[j]
+		new_idx.FileName[p] = fnames[j]
+		new_idx.Version[p] = Ver[j]
+		p+=1
 				
-			for j in range(0,p):
-				match = np.where(idx.Date == new_idx.Date[j])[0]
-				if match.size > 0:
-					if idx.Version[match[0]] > new_idx.Version[j]:
-						#old one is newer (unlikely)
-						usen[j] = False
-					else:
-						#new one is newer
-						useo[match[0]] = False
+	new_idx = new_idx[:p]
 
-			usen = np.where(usen)[0]
-			new_idx = new_idx[usen]
-			useo = np.where(useo)[0]
-			idx = idx[useo]					
+
+	#check for duplicates within old index
+	usen = np.ones(p,dtype='bool')
+	useo = np.ones(idx.size,dtype='bool')
+				
+	for j in range(0,p):
+		match = np.where(idx.Date == new_idx.Date[j])[0]
+		if match.size > 0:
+			if idx.Version[match[0]] > new_idx.Version[j]:
+				#old one is newer (unlikely)
+				usen[j] = False
+			else:
+				#new one is newer
+				useo[match[0]] = False
+
+	usen = np.where(usen)[0]
+	new_idx = new_idx[usen]
+	useo = np.where(useo)[0]
+	idx = idx[useo]					
 			
-			#join indices together and update file
-			idx_out = RT.JoinRecarray(idx,new_idx)
-			srt = np.argsort(idx_out.Date)
-			idx_out = idx_out[srt]
-			_UpdateDataIndex(idx_out,fname)
-			
-			
+	#join indices together and update file
+	idx_out = RT.JoinRecarray(idx,new_idx)
+	srt = np.argsort(idx_out.Date)
+	idx_out = idx_out[srt]
+	_UpdateDataIndex(idx_out,fname)
+

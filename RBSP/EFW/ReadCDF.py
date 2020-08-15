@@ -1,5 +1,4 @@
 import numpy as np
-from .. import Globals
 from ..Tools.Downloading._ReadDataIndex import _ReadDataIndex
 from ..Tools.ReadCDF import ReadCDF as RCDF
 from . import _EFW

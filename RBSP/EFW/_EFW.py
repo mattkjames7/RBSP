@@ -6,3 +6,6 @@ from .. import Globals
 #data path and index file name:
 idxfname = Globals.DataPath + 'EFW/{:s}.{:s}.dat'
 datapath = Globals.DataPath + 'EFW/{:s}/{:s}/'
+
+#file version format
+vfmt = ['v']

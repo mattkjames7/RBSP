@@ -3,7 +3,7 @@ import time
 import os
 import numpy as np
 
-def _GetCDFURL(Year,Month,url0):
+def _GetCDFURL(url0):
 	'''
 	Retrieves the url(s) of the cdf file to be downloaded.
 	
@@ -13,8 +13,6 @@ def _GetCDFURL(Year,Month,url0):
 	Returns:
 		urls,fnames
 	'''
-	#first let's get the url which will contain the link to the cdf files
-	url = url0.format(Year,Month)
 	
 	#set up a temporary file/path 
 	tmppath = Globals.DataPath+'tmp/'
@@ -23,7 +21,7 @@ def _GetCDFURL(Year,Month,url0):
 	tmpfname = tmppath + '{:17.7f}.tmp'.format(time.time())
 	
 	#wget the file
-	ret = os.system('wget --no-verbose '+url+' -O '+tmpfname)
+	ret = os.system('wget --no-verbose '+url0+' -O '+tmpfname)
 	
 	if ret != 0:
 		return [],[]
@@ -37,13 +35,12 @@ def _GetCDFURL(Year,Month,url0):
 	#now search for the line with the substring '.cdf"'
 	urls = []
 	fnames = []
-	yearstr = '{:04d}'.format(Year)
 	for i in range(0,n):
-		if '.cdf"' in lines[i] and yearstr in lines[i]:
+		if '.cdf"' in lines[i]:
 			s = lines[i].replace('<a','"').replace('</a>','"').replace('>','"').split('"')
 			for ss in s:
 				if '.cdf' in ss and not 'http' in ss:
-					urls.append(url+ss)
+					urls.append(url0+ss)
 					fnames.append(ss)
 					break
 					
