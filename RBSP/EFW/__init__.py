@@ -13,3 +13,6 @@ from .ReadCDF import ReadCDF
 from . import _EFW
 from .ReadIndex import ReadIndex
 from .URL import URL
+from .DataAvailability import DataAvailability
+from .RebuildDataIndex import RebuildDataIndex
+from .DeleteDate import DeleteDate

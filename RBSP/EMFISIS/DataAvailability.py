@@ -1,11 +1,9 @@
 import numpy as np
-from ..Tools.Downloading._RebuildDataIndex import _RebuildDataIndex
-from . import _EFW
+from .ReadIndex import ReadIndex
 
-
-def RebuildDataIndex(sc,L):
+def DataAvailability(sc='a',L='l4',Prod=None):
 	'''
-	Rebuilds the data index for a data product.
+	Provide a list of dates for which there are data.
 
 	Inputs
 	======
@@ -28,11 +26,7 @@ def RebuildDataIndex(sc,L):
 	'l1.mscb2' (MSCB2 in UVW coordinates)
 	'l1.vb1' (VB1 in UVW coordinates)
 	'l1.vb2'(VB2 in UVW coordinates)
-	'''		
-	idxfname = _EFW.idxfname.format(L,sc)
-	datapath = _EFW.datapath.format(L,sc)
-
-	vfmt = _EFW.vfmt
-
 	
-	_RebuildDataIndex(datapath,idxfname,vfmt)
+	'''
+	idx = ReadIndex(sc,L,Prod)
+	return np.unique(idx.Date)

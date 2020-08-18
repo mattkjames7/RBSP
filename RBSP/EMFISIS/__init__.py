@@ -12,7 +12,6 @@ Electron densities (using UHR)
 
 
 from .DownloadData import DownloadData
-from .ReadData import ReadData
 from . import _EMFISIS
 from .ReadIndex import ReadIndex
 from .URL import URL
@@ -20,4 +19,5 @@ from .RebuildDataIndex import RebuildDataIndex
 from .DeleteDate import DeleteDate
 from .ReadCDF import ReadCDF
 from .InterpObj import InterpObj
+from .DataAvailability import DataAvailability
 

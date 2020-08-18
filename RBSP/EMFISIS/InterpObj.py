@@ -18,9 +18,9 @@ def InterpObj(Date,sc='a',Coords='GSE',Res='1sec',Smooth=None):
 	mag,meta = ReadCDF(Date,sc,L,Prod)
 	
 	#get the date and time
-	dt = np.float32(cdflib.cdfepoch.breakdown(mag['Epoch']))
+	dt = np.array(cdflib.cdfepoch.breakdown(mag['Epoch']))
 	Date = dt[:,0]*10000 + dt[:,1]*100 + dt[:,2]
-	ut = dt[:,3] + dt[:,4]/60.0 + dt[:,5]/3600.0 + dt[:,6]/3.6e6 + dt[:,7]/3.6e9
+	ut = np.float32(dt[:,3]) + np.float32(dt[:,4])/60.0 + np.float32(dt[:,5])/3600.0 + np.float32(dt[:,6])/3.6e6 + np.float32(dt[:,7])/3.6e9
 	
 	#get continuous time
 	mutc = ContUT(Date,ut)
