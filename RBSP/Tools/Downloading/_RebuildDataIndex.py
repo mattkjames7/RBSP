@@ -3,10 +3,10 @@ from ..ListFiles import ListFiles
 import re
 from ._UpdateDataIndex import _UpdateDataIndex
 
-def _RebuildDataIndex(fpath,fname,vfmt=['v','.']):
+def _RebuildDataIndex(fpath,fname,vfmt='v\d\d.\d\d'):
 	
 	#define the dtype
-	dtype = [('Date','int32'),('FileName','object'),('Version','int16')]
+	dtype = [('Date','int32'),('FileName','object'),('Version','int32')]
 	
 	#list all of the files in the path
 	_,files = ListFiles(fpath,ReturnNames=True)
@@ -17,12 +17,18 @@ def _RebuildDataIndex(fpath,fname,vfmt=['v','.']):
 	
 	#extract the versions from each file
 	dp = re.compile('\d\d\d\d\d\d\d\d')
-	vp = re.compile(vfmt[0]+'\d\d'+vfmt[1]+'\d\d')
+	vp = re.compile(vfmt)
 	p = 0
+	
+	vlet = vfmt.replace('\d','')
+	
 	for i in range(0,nf):
 		if '.cdf' in files[i]:
 			Date = np.int32(dp.search(files[i]).group())
-			Ver	= np.int32((vp.search(files[i]).group()[1:]).replace(vfmt[0],'').replace(vfmt[1],''))
+			tmp	= vp.search(files[i]).group()[1:]
+			for v in vlet:
+				tmp = tmp.replace(v,'')			
+			Ver = np.int32(tmp)
 			data.FileName[i] = files[i]
 			data.Date[i] = Date
 			data.Version[i] = Ver

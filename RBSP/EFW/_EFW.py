@@ -8,4 +8,4 @@ idxfname = Globals.DataPath + 'EFW/{:s}.{:s}.dat'
 datapath = Globals.DataPath + 'EFW/{:s}/{:s}/'
 
 #file version format
-vfmt = ['v']
+vfmt = 'v\d\d'

@@ -31,6 +31,9 @@ def _GetCDFURL(url0):
 	lines = f.readlines()
 	n = np.size(lines)
 	f.close()
+	
+	#remove the file
+	os.system('rm -v '+tmpfname)
 
 	#now search for the line with the substring '.cdf"'
 	urls = []
@@ -43,6 +46,7 @@ def _GetCDFURL(url0):
 					urls.append(url0+ss)
 					fnames.append(ss)
 					break
+					
 					
 	return np.array(urls),np.array(fnames)
 	

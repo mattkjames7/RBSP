@@ -11,7 +11,7 @@ from ._ExtractDateVersion import _ExtractDateVersion
 from ._ReduceDownloadList import _ReduceDownloadList
 from ..ListDates import ListDates
 
-def _DownloadData(URLF,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Overwrite=False,Progress=False):
+def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],vfmt='v\d\d.\d\d',FContains=None,Overwrite=False,Progress=False):
 	'''
 	Downloads Arase data
 
@@ -30,10 +30,17 @@ def _DownloadData(URLF,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Ove
 		If > 2 elements - this is treated as a specific list of dates to download
 	vfmt : list
 		2 element list containing characters which split the version
-		numbers, by default	it is ['v','_']
+		numbers, by default	it is ['v','.']
+	FContains : str or None
+		if set to a string, only files which contain the given substring will be downloaded
 	Overwrite : bool
 		If True then existing files will be overwritten
 	'''
+	
+	#check if the output path exists
+	if not os.path.isdir(outpath):
+		os.system('mkdir -pv '+outpath)
+	
 	#populate the list of dates to download
 	if np.size(Date) == 1:
 		dates = np.array([Date])
@@ -80,7 +87,7 @@ def _DownloadData(URLF,fname,outpath,Date=[20170101,20200101],vfmt=['v','.'],Ove
 	
 	#reduce the lists 
 	idx = _ReadDataIndex(fname)
-	urls,fnames,fDate,Ver = _ReduceDownloadList(urls,fnames,fDate,Ver,idx,dates,Overwrite)
+	urls,fnames,fDate,Ver = _ReduceDownloadList(urls,fnames,fDate,Ver,idx,dates,FContains,Overwrite)
 	nu = urls.size
 	
 	if nu == 0:

@@ -9,7 +9,7 @@ def _ReadDataIndex(fname):
 	automatically).
 	'''
 	#define the dtype
-	dtype = [('Date','int32'),('FileName','object'),('Version','int16')]
+	dtype = [('Date','int32'),('FileName','object'),('Version','int32')]
 	
 	
 	#check it exists
