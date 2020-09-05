@@ -6,3 +6,4 @@ from . import Pos
 from . import RBSPICE
 from . import RPS
 from . import Tools
+from . import Fields

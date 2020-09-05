@@ -11,7 +11,9 @@ from ._ExtractDateVersion import _ExtractDateVersion
 from ._ReduceDownloadList import _ReduceDownloadList
 from ..ListDates import ListDates
 
-def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],vfmt='v\d\d.\d\d',FContains=None,Overwrite=False,Progress=False):
+def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],
+				vfmt='v\d\d.\d\d',FContains=None,Overwrite=False,
+				Progress=False,Download=True):
 	'''
 	Downloads Arase data
 
@@ -95,6 +97,9 @@ def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],vfmt='v\d\d.\d\d',
 		return 
 	else:
 		print('{:d} files to download'.format(nu))
+		
+	if Download == False:
+		return fDate
 		
 	#create new output index
 	new_idx = np.recarray(nu,dtype=idx.dtype)

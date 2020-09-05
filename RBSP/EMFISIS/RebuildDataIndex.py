@@ -3,7 +3,7 @@ from ..Tools.Downloading._RebuildDataIndex import _RebuildDataIndex
 from . import _EMFISIS
 
 
-def RebuildDataIndex(sc,L,prod):
+def RebuildDataIndex(sc,L,Prod):
 	'''
 	Rebuilds the data index for a data product.
 

@@ -27,8 +27,9 @@ def InterpObj(Date,sc='a',Coords='GSE',Res='1sec',Smooth=None):
 	
 	#interpolate the bad data
 	good = np.isfinite(mag['Mag']).all(axis=1) & (mag['magInvalid'] == 0)
-	good = np.where(good)[0]
 	bad = np.where(good == False)[0]
+	good = np.where(good)[0]
+	
 
 	fx = interp1d(mutc[good],mag['Mag'][good,0],bounds_error=False,fill_value='extrapolate')
 	fy = interp1d(mutc[good],mag['Mag'][good,1],bounds_error=False,fill_value='extrapolate')

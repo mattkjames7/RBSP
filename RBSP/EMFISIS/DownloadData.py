@@ -5,7 +5,7 @@ from . import _EMFISIS
 from .URL import URL
 
 
-def DownloadData(sc='a',L=4,Prod=None,Date=[20120830,20200101],Overwrite=False,Verbose=True):
+def DownloadData(sc='a',L='l4',Prod=None,Date=[20120830,20200101],Overwrite=False,Verbose=True,Download=True):
 	'''
 	Downloads EMFISIS data.
 
@@ -25,7 +25,7 @@ def DownloadData(sc='a',L=4,Prod=None,Date=[20120830,20200101],Overwrite=False,V
 	Level 		Prod		Description
 	'l4' 		None		densities
 	'l3'	 	'1sec-***'	1-second resolution magnetic fields
-	'l3'	 	'1sec-***'	4-second resolution magnetic fields
+	'l3'	 	'4sec-***'	4-second resolution magnetic fields
 	'l3'	 	'hires-***'	High resolution magnetic fields
 	'l2'		'HFR-spectra'
 	'l2'		'HFR-spectra-merged'
@@ -55,7 +55,7 @@ def DownloadData(sc='a',L=4,Prod=None,Date=[20120830,20200101],Overwrite=False,V
 		datapath = _EMFISIS.datapath.format(L,sc,Prod)
 	
 	URLF = URL(sc,L)
-	_DownloadData(URLF,idxfname,datapath,Date,_EMFISIS.vfmt,fc,Overwrite,Verbose)
+	_DownloadData(URLF,idxfname,datapath,Date,_EMFISIS.vfmt,fc,Overwrite,Verbose,Download)
 
 
 	# #populate the list of dates to trace first
