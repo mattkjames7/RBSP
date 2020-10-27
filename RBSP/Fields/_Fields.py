@@ -63,4 +63,5 @@ dtype = [	('Date','int32'),
 			('Zgsm','float32'),
 			('Xsm','float32'),
 			('Ysm','float32'),
-			('Zsm','float32')]
+			('Zsm','float32'),
+			('Step','int16')]

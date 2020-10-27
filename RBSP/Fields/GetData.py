@@ -23,6 +23,7 @@ def GetData(Date,ut=[0.0,24.0],sc='a',Verbose=True):
 	#get the time range to include
 	utcr = ContUT(dater,np.array(ut))
 
+
 	#now count the file sizes
 	nd = dates.size
 	n = 0

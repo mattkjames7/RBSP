@@ -12,6 +12,9 @@ from .CalculateEx import CalculateEx
 from .ModelField import ModelField
 import os
 import RecarrayTools as RT
+from .. import EMFISIS
+from ..Tools.ConvertTime import ConvertTime
+import DateTimeTools as TT
 
 def ConvertEFieldDay(Date,sc):
 	'''
@@ -26,10 +29,7 @@ def ConvertEFieldDay(Date,sc):
 
 	#get date and time and continuous time
 	print('Calculating time')
-	dt = np.array(cdflib.cdfepoch.breakdown(data['epoch']))
-	eDate = dt[:,0]*10000 + dt[:,1]*100 + dt[:,2]
-	ut = np.float32(dt[:,3]) + np.float32(dt[:,4])/60.0 + np.float32(dt[:,5])/3600.0 + np.float32(dt[:,6])/3.6e6 + np.float32(dt[:,7])/3.6e9
-	utc = ContUT(eDate,ut)
+	eDate,ut,utc = ConvertTime(data['epoch'])
 	n = utc.size
 	
 	#create the output array
@@ -55,6 +55,10 @@ def ConvertEFieldDay(Date,sc):
 	#get the magnetic field interpolation objects
 	print('Obtaining magnetic field interpolation objects')
 	fx,fy,fz = InterpObj(Date,sc,Coords='GSE')
+	mag,_ = EMFISIS.ReadCDF(Date,sc=sc,L='l3',Prod='4sec-gse')
+	mDate,mut,mutc = ConvertTime(mag['Epoch'])
+	mbad = mag['magInvalid']
+	mbadi = np.where(mbad)[0]
 	
 	#get the magnetic field
 	print('Interpolating magnetic field')
@@ -62,6 +66,7 @@ def ConvertEFieldDay(Date,sc):
 	out.ByGSE = fy(utc)
 	out.BzGSE = fz(utc)
 	
+
 	
 	#get mGSE E field and GSE spin axis
 	print('Converting mGSE to GSE')
@@ -96,7 +101,15 @@ def ConvertEFieldDay(Date,sc):
 	out.EP,out.ET,out.EC = GSMtoDipolar(out.ExSM,out.EySM,out.EzSM,out.mBxSM,out.mBySM,out.mBzSM,out.Xsm,out.Ysm,out.Zsm)
 	out.BP,out.BT,out.BC = GSMtoDipolar(out.BxSM,out.BySM,out.BzSM,out.mBxSM,out.mBySM,out.mBzSM,out.Xsm,out.Ysm,out.Zsm)
 	
-
+	#scan for bad data flags
+	out.Step[:] = 0
+	for b in mbadi:
+		#before the step
+		use0 = np.where(out.utc <= mutc[b])[0][-1]
+		#after the step
+		use1 = np.where(out.utc > mutc[b])[0][0]
+		out.Step[use0] = 1
+		out.Step[use1] = 2
 	
 	
 	#save the file
