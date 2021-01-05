@@ -1,13 +1,13 @@
 import RecarrayTools as RT
 from .. import Globals
-from .TraceFieldDay import TraceFieldFootprintsDay
+from .TraceFieldDay import TraceFieldDay
 import DateTimeTools as TT
 from .GetPos import GetPos
 import os
 import numpy as np
 from ._ReadDataIndex import _ReadDataIndex
 
-def SaveFieldFootprintTraces(sc='a',Model='T96',StartDate=20120830,EndDate=20191017,Verbose=True,Overwrite=False,Combine=False):
+def SaveFieldTraces(sc='a',Model='T96',StartDate=20120830,EndDate=20191017,Verbose=True,Overwrite=False,Combine=False):
 	'''
 	Saves the Tsyganenko field trace footprints for RBSP within a range 
 	of dates.
@@ -33,7 +33,7 @@ def SaveFieldFootprintTraces(sc='a',Model='T96',StartDate=20120830,EndDate=20191
 		fname = outpath + '{:08d}.bin'.format(dates[i])
 		if Overwrite or (not os.path.isfile(fname)):
 			print('Tracing date {:8d} ({:d} of {:d})'.format(dates[i],i+1,n))
-			T = TraceFieldFootprintsDay(dates[i],sc,Model,Verbose)
+			T = TraceFieldDay(dates[i],sc,Model,Verbose)
 			RT.SaveRecarray(T,fname)
 		else:
 			print('File {:s} exists'.format(fname))

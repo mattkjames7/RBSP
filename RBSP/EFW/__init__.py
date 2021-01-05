@@ -16,3 +16,6 @@ from .URL import URL
 from .DataAvailability import DataAvailability
 from .RebuildDataIndex import RebuildDataIndex
 from .DeleteDate import DeleteDate
+from .SavePotentials import SavePotentials,_SavePotential
+from ._ReadPotential import _ReadPotential
+from .GetPotential import GetPotential

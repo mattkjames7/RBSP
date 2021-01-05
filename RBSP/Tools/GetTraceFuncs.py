@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from .. import Globals
-from ..Pos.ReadFieldTraces import ReadAllFootprintTraces
+from ..Pos.ReadFieldTraces import ReadAllFieldTraces
 
 def GetTraceFuncs(sc='a'):
 	
@@ -10,7 +10,7 @@ def GetTraceFuncs(sc='a'):
 		TF = {}
 		
 		#load the traces
-		traces = ReadAllFootprintTraces(sc)
+		traces = ReadAllFieldTraces(sc)
 		
 		#list the fields to create interpolation objects for
 		fields = ['MlatN','MlatS','GlatN','GlatS','MlonN','MlonS','GlonN','GlonS',

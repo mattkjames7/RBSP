@@ -11,6 +11,7 @@ except:
 #RBSP position
 aPos = None
 bPos = None
+Vel = {}
 
 
 #functions which will interpolate the positions/traces of each spacecraft

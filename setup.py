@@ -28,6 +28,7 @@ setuptools.setup(
 		'RecarrayTools',
 		'PyFileIO',
 		'DateTimeTools',
+		'kpindex'
 	],
 )
 

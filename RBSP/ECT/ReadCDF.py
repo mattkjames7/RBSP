@@ -1,27 +1,51 @@
 import numpy as np
-from .. import Globals
-from ..Tools.CDFtoRecarray import CDFtoRecarray
-from ._ReadDataIndex import _ReadDataIndex
-import pysatCDF
+from ..Tools.Downloading._ReadDataIndex import _ReadDataIndex
+from ..Tools.ReadCDF import ReadCDF as RCDF
+from . import _ECT
+import os
+
 
 def ReadCDF(Date,sc='a',Inst='hope',L='l3.moments'):
 	'''
-	Reads the data from a CDF file.
+	Inputs
+	======
+	sc : str
+		'a' or 'b'
+	Inst: str
+		'hope', 'mageis' or 'rept' 
+	L : str
+		Level of data to download
+
+
+
+	Available data products
+	=======================
+	hope: 'l2.sectors'|'l2.spinaverage'|'l3.moments'|'l3.pitchangle'
+	mageis: 'l2'|'l3'
+	rept: 'l2'|'l3'
 	
 	'''
 	
-	idx = _ReadDataIndex(sc,Inst,L)
-	path = Globals.DataPath+'ECT/{:s}/{:s}/{:s}/'.format(Inst,L,sc)
-
+	#read the data index
+	idx = _ReadDataIndex(_ECT.idxfname.format(Inst,L,sc))
+	
+	#check the index for the appropriate date
 	use = np.where(idx.Date == Date)[0]
 	if use.size == 0:
-		print('Date not found')
-		return None,'nofile'
+		print('Date not found, run RBSP.EFW.DownloadData() to check for updates.')
+		return None,None
+	idx = idx[use]
+	mx = np.where(idx.Version  == np.max(idx.Version))[0]
+	mx = mx[0]
 	
-	fname = path + idx[use[0]].FileName
-	try:
-		cdf = pysatCDF.CDF(fname)
-	except:
-		print('Failed to read CDF file')
-		return None,'badfile'
-	return cdf.data,cdf.meta
+	#get the file name
+	fname = _ECT.datapath.format(Inst,L,sc) + idx[mx].FileName
+
+
+	#check file exists
+	if not os.path.isfile(fname):
+		print('Index is broken: Update the data index')
+		return None,None
+		
+	#read the file
+	return RCDF(fname)

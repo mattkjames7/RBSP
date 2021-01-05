@@ -105,12 +105,17 @@ def ConvertEFieldDay(Date,sc):
 	out.Step[:] = 0
 	for b in mbadi:
 		#before the step
-		use0 = np.where(out.utc <= mutc[b])[0][-1]
+		try:
+			use0 = np.where(out.utc <= mutc[b])[0][-1]
+			out.Step[use0] = 1
+		except:
+			pass
 		#after the step
-		use1 = np.where(out.utc > mutc[b])[0][0]
-		out.Step[use0] = 1
-		out.Step[use1] = 2
-	
+		try:
+			use1 = np.where(out.utc > mutc[b])[0][0]
+			out.Step[use1] = 2
+		except:
+			pass
 	
 	#save the file
 	outdir = _Fields.datapath.format(sc)

@@ -11,3 +11,11 @@ datapath = Globals.DataPath + 'EFW/{:s}/{:s}/'
 vfmt = 'v\d\d'
 
 
+#potential dtype
+pdtype = [	('Date','int32'),		
+			('ut','float32'),
+			('utc','float64'),
+			('Vsc','float32'),
+			('VscFlag','int8'),
+			('ne','float32'),
+			('neFlag','int8')]

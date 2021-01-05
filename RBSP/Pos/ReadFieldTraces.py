@@ -4,7 +4,7 @@ import DateTimeTools as TT
 import RecarrayTools as RT
 import os
 
-def ReadAllFootprintTraces(sc='a',Model='T96'):
+def ReadAllFieldTraces(sc='a',Model='T96'):
 	'''
 	
 	'''
@@ -20,7 +20,7 @@ def ReadAllFootprintTraces(sc='a',Model='T96'):
 	
 	return RT.ReadRecarray(fname,dtype)
 	
-def ReadFieldFootprintTraces(Date,sc='a',Model='T96'):
+def ReadFieldTraces(Date,sc='a',Model='T96'):
 	'''
 	Reads the footprint trace files.
 	

@@ -3,7 +3,7 @@ import PyGeopack as gp
 import numpy as np
 from .GetPos import GetPos
 
-def TraceFieldFootprintsDay(Date,sc='a',Model='T96',Verbose=True):
+def TraceFieldDay(Date,sc='a',Model='T96',Verbose=True):
 	'''
 	Traces the Tsyganenko model field looking for the magnetic 
 	footprints of RBSP for one day at 1-minute resolution.

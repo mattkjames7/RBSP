@@ -7,3 +7,6 @@ from . import RBSPICE
 from . import RPS
 from . import Tools
 from . import Fields
+from . import VExB
+
+__version__ = "0.0.2"
