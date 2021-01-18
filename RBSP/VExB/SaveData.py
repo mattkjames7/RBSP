@@ -5,12 +5,13 @@ from ..Pos.GetVelocity import GetVelocity
 import DateTimeTools as TT
 from scipy.interpolate import interp1d
 from . import _VExB
-from ..Tools.VollandStern import VollandSternCart
 import kpindex
 from .VExB import VExB
 import RecarrayTools as RT
 import os
 from ..Fields.ConvertEFieldDay import ConvertEFieldDay
+import vsmodel
+import pyomnidata as omni
 
 def SaveData(Date,sc,Overwrite=False):
 	'''
@@ -73,11 +74,23 @@ def SaveData(Date,sc,Overwrite=False):
 	utc0 = TT.ContUT(kp.Date,kp.ut0)
 	utc1 = TT.ContUT(kp.Date,kp.ut1)
 	utc = 0.5*(utc0 + utc1)
-	fkp = interp1d(utc,kp.Kp,bounds_error=False,fill_value=np.inf)
+	fkp = interp1d(utc,kp.Kp,bounds_error=False,fill_value=np.nan)
 	k = fkp(out.utc)
 	
+	#get the electric field data
+	odata = omni.GetOMNI(Date//10000)
+	#bad = np.where(np.isfinite(odata.E) == False)[0]
+	good = np.where(np.isfinite(odata.E))[0]
+	E = odata.E
+	#E = odata.E.clip(min=0.1)
+	#E[bad] = 0.1
+	outc = TT.ContUT(odata.Date,odata.ut)
+	fE = interp1d(outc[good],E[good],bounds_error=False,fill_value=np.nan)
+	Esw = fE(out.utc).clip(min=0.1)
+	
+	
 	#get the model electric field
-	out.mEx,out.mEy,out.mEz = VollandSternCart(out.x,out.y,k)
+	out.mEx,out.mEy,out.mEz = vsmodel.ModelECart(out.x,out.y,Kp=k,Esw=Esw)
 	
 	#now calculate the ExB drift using model E
 	out.mVxExB,out.mVyExB,out.mVzExB = VExB(out.mEx*1e-3,out.mEy*1e-3,out.mEz*1e-3,out.Bx*1e-9,out.By*1e-9,out.Bz*1e-9)

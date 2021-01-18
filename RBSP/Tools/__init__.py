@@ -5,4 +5,3 @@ from .RelVelocity import RelVelocity
 from .MaxwellBoltzmannDist import MaxwellBoltzmannDist
 from .IntegrateSpectrum import IntegrateSpectrum
 from .IntegrateFluxes import IntegrateFluxes
-from .VollandStern import VollandStern,VollandSternCart
