@@ -28,7 +28,9 @@ setuptools.setup(
 		'RecarrayTools',
 		'PyFileIO',
 		'DateTimeTools',
-		'kpindex'
+		'kpindex',
+		'pyomnidata',
+		'vsmodel'
 	],
 )
 
