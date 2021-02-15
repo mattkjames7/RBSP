@@ -85,6 +85,8 @@ class PSpecCls(object):
 		self.Omega = []
 		self.density = []
 		self.Moments = []
+		self.Counts = []
+		self.Errors = []
 		self.n = 0
 		self.SpecType = SpecType
 		
@@ -135,7 +137,7 @@ class PSpecCls(object):
 			Erange = (0.03,np.inf)
 		self.density.append(IntegrateSpectrum(E,PSD,self.Mass,Omega,Erange))			
 	
-	def AddData(self,Date,ut,Epoch,E0,E1,Emid,Spec,dt=None,Meta=None,Omega=4*np.pi,Label='',Moments=None):
+	def AddData(self,Date,ut,Epoch,E0,E1,Emid,Spec,dt=None,Meta=None,Omega=4*np.pi,Label='',Moments=None,Counts=None,Errors=None):
 		'''
 		Adds data to the object
 		
@@ -169,6 +171,8 @@ class PSpecCls(object):
 		self.Label.append(Label)
 		self.Omega.append(Omega)
 		self.Moments.append(Moments)
+		self.Counts.append(Counts)
+		self.Errors.append(Errors)
 	
 		#separate energy bins into lower, uppwer and middle
 		self.E0.append(E0)
@@ -200,20 +204,25 @@ class PSpecCls(object):
 		#add to the total count of spectrograms stored
 		self.n += 1
 	
+	
 	def _GetSpectrum(self,I,sutc,dutc,Method,xparam,yparam):
 	
 		#get the appropriate data
 		l = self.Label[I]
 		utc = self.utc[I]
 		if xparam == 'V':
-			f = self.V[I]
+			Y = self.V[I]
 		else:
-			f = self.Energy[I]
+			Y = self.Energy[I]
 			
 		if yparam == 'PSD':
 			Spec = self.PSD[I]		
 		else:
-			Spec = self.Spec[I]		
+			Spec = self.Spec[I]	
+			
+		Err = self.Errors[I]
+		if Err is None:
+			Err = np.zeros(Spec.shape,dtype='float32') + np.nan	
 		
 		#find the nearest
 		dt = np.abs(utc - sutc)
@@ -221,56 +230,66 @@ class PSpecCls(object):
 		
 		#check if the nearest is within dutc
 		if dt[near] > dutc:
-			return [],[],[]
+			return [],[],[],[]
 			
 		
 		#check if we are past the end of the time series, or Method is nearest
 		if (Method == 'nearest') or (sutc < utc[0]) or (sutc > utc[-1]):
-			s = Spec[near,:]
-			if len(f.shape) == 2:
-				e = f[near,:]
+			z = Spec[near,:]
+			if len(Y.shape) == 2:
+				y = Y[near,:]
 			else:
-				e = f
-			
+				y = Y
+
+			e = Err[near,:]*z
 		else:
 			#in this case we need to find the two surrounding neighbours
 			#and interpolate between them
 			bef = np.where(utc <= sutc)[0][-1]
 			aft = np.where(utc > sutc)[0][0]
 			
-			s0 = Spec[bef,:]
-			s1 = Spec[aft,:]
+			z0 = Spec[bef,:]
+			z1 = Spec[aft,:]
+			
+			e0 = Err[bef,:]
+			e1 = Err[aft,:]
 			
 			if len(f.shape) == 2:
-				e0 = f[near,:]
-				e1 = f[near,:]
+				y0 = Y[near,:]
+				y1 = Y[near,:]
 			else:
-				e0 = f
-				e1 = f
+				y0 = Y
+				y1 = Y
 			
 			dx = utc[aft] - utc[bef]
-			ds = s1 - s0
+			dz = z1 - z0
+			dy = y1 - y0
 			de = e1 - e0
 			
-			dsdx = ds/dx
+			dzdx = dz/dx
+			dydx = dy/dx
 			dedx = de/dx
 			
 			dt = sutc - utc[bef]
 			
-			s = s0 + dt*dsdx
+			z = z0 + dt*dzdx
+			y = y0 + dt*dydx
 			e = e0 + dt*dedx
 		
+			e = e*z
 		
 		#remove rubbish
-		good = np.where(e > 0)[0]
+		good = np.where(y > 0)[0]
+		y = y[good]
+		z = z[good]
 		e = e[good]
-		s = s[good]
 			
-		#sort by e
-		srt = np.argsort(e)
+		#sort by y
+		srt = np.argsort(y)
 		e = e[srt]
-		s = s[srt]
-		return e,s,l
+		y = y[srt]
+		z = z[srt]
+		return y,z,e,l
 		
 	def _GetMoment(self,I,sutc,dutc):
 	
@@ -322,6 +341,8 @@ class PSpecCls(object):
 			Array(s) of energies or velocities
 		spec : float/list
 			Array(s) containing specral data
+		err : float/list
+			Array(s) containing error bars
 		labs : list
 			List of plot labels
 		
@@ -335,24 +356,28 @@ class PSpecCls(object):
 		spec = []
 		energy = []
 		labs = []
+		err = []
 		
 		#get the spectra for each element in  self.Spec
 		for i in range(0,self.n):
-			e,s,l = self._GetSpectrum(i,utc,dutc,Method,xparam,yparam)
-			if len(s) > 0:
-				spec.append(s)
-				energy.append(e)
+			y,z,e,l = self._GetSpectrum(i,utc,dutc,Method,xparam,yparam)
+			if len(z) > 0:
+				spec.append(z)
+				energy.append(y)
 				labs.append(l)
+				err.append(e)
 			
 		#combine if necessary
 		if not Split:
 			spec = np.concatenate(spec)
 			energy = np.concatenate(energy)
+			err = np.concatenate(err)
 			srt = np.argsort(energy)
 			spec = spec[srt]
 			energy = energy[srt]
-			
-		return energy,spec,labs
+			err = err[srt]
+
+		return energy,spec,err,labs
 		
 	def GetMoments(self,Date,ut,Maxdt=60.0):
 		'''
@@ -464,7 +489,7 @@ class PSpecCls(object):
 		'''	
 		
 		#get the spectra
-		energy,spec,labs = self.GetSpectrum(Date,ut,Method,Maxdt,Split,xparam,yparam)
+		energy,spec,err,labs = self.GetSpectrum(Date,ut,Method,Maxdt,Split,xparam,yparam)
 		
 		
 		#create the figure
@@ -484,14 +509,17 @@ class PSpecCls(object):
 				bad = np.where((np.isfinite(spec[i]) == False) | (spec[i] == 0.0))[0]
 				spec[i][bad] = np.nan
 				if color is None:
-					ax.plot(energy[i],spec[i],label=labs[i],marker='.')
+					#ax.plot(energy[i],spec[i],label=labs[i],marker='.')
+					ax.errorbar(energy[i],spec[i],yerr=err[i],marker='.')
 				else:
-					ax.plot(energy[i],spec[i],color=color[i % nc],label=labs[i],marker='.')
+					#ax.plot(energy[i],spec[i],color=color[i % nc],label=labs[i],marker='.')
+					ax.errorbar(energy[i],spec[i],yerr=err[i],color=color[i % nc],marker='.',label=labs[i])
 			
 		else:
 			bad = np.where((np.isfinite(spec) == False) | (spec == 0.0))[0]
 			spec[bad] = np.nan
-			ax.plot(energy,spec,color=color,marker='.')
+			#ax.plot(energy,spec,color=color,marker='.')
+			ax.errorbar(energy,spec,yerr=err,color=color,marker='.')
 
 		#set the x-axis scale
 		if xlog is None:

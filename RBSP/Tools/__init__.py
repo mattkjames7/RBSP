@@ -5,3 +5,5 @@ from .RelVelocity import RelVelocity
 from .MaxwellBoltzmannDist import MaxwellBoltzmannDist
 from .IntegrateSpectrum import IntegrateSpectrum
 from .IntegrateFluxes import IntegrateFluxes
+from . import TestSpectrum
+from .TestIntegrate import TestIntegrate

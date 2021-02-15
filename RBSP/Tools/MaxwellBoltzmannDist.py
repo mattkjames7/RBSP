@@ -9,7 +9,7 @@ e = np.float64(1.6022e-19)
 def MaxwellBoltzmannDist(n,v,T,m):
 	
 	vth = np.sqrt(k_B*np.float64(T)/np.float64(m))
-	f = n* (1.0/(vth*(np.sqrt(2.0*np.pi)))**3.0)*  np.exp(-v**2.0/(2.0*vth**2.0))
+	f = n* (1.0/(vth*(np.sqrt(2.0*np.pi)))**3.0)*  np.exp(-np.float64(v)**2.0/(2.0*vth**2.0))
 	return f
 
 def MaxwellBoltzmannDistE(n,E,T,m):

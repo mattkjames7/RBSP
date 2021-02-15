@@ -16,7 +16,7 @@ def GetPotential(Date,sc):
 	#find the number of records
 	n = 0
 	for i in range(0,dates.size):
-		n += _ReadPotential(Date,sc,Size=True)
+		n += _ReadPotential(dates[i],sc,Size=True)
 		
 	#create the output array
 	out = np.recarray(n,dtype=_EFW.pdtype)
@@ -24,7 +24,7 @@ def GetPotential(Date,sc):
 	#read the data in
 	p = 0
 	for i in range(0,dates.size):
-		tmp = _ReadPotential(Date,sc,Size=False)
+		tmp = _ReadPotential(dates[i],sc,Size=False)
 		out[p:p+tmp.size] = tmp
 		p += tmp.size
 		

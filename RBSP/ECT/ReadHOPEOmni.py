@@ -70,10 +70,10 @@ def ReadHOPEOmni(Date,sc='a',RemoveBinOverlap=True):
 
 
 		#replace bad data
-		fields = {	'FPDO' : 	('H+','Energy (keV)',r'H$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','H'),
-					'FHEDO' : 	('He+','Energy (keV)',r'He$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','He'),
-					'FODO' : 	('O+','Energy (keV)',r'O$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','O'),
-					'FEDO' : 	('e','Energy (keV)',r'e Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','e'),}
+		fields = {	'FPDO' : 	('H+','Energy (keV)',r'H$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','H','Counts_P_Omni'),
+					'FHEDO' : 	('He+','Energy (keV)',r'He$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','He','Counts_He_Omni'),
+					'FODO' : 	('O+','Energy (keV)',r'O$^+$ Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','O','Counts_O_Omni'),
+					'FEDO' : 	('e','Energy (keV)',r'e Flux\n((s cm$^{2}$ sr keV)$^{-1}$)','e','Counts_E_Omni'),}
 		
 		for k in list(fields.keys()):
 			s = data[k]
@@ -81,11 +81,16 @@ def ReadHOPEOmni(Date,sc='a',RemoveBinOverlap=True):
 			s[bad] = np.nan
 			
 			#get the base field name
-			kout,ylabel,zlabel,spectype = fields[k]
+			kout,ylabel,zlabel,spectype,ctstr = fields[k]
 			
 			#output spectra fields name
 			kspec = kout + 'Flux'
 			
+			#get the counts
+			cts = data[ctstr]
+			
+			#calculate the Poisson counting error - multiply this by PSD or flux to get error bars
+			err = np.sqrt(cts)/cts
 		
 			#select the appropriate time/date and energy
 			if k == 'FEDO':
@@ -108,7 +113,7 @@ def ReadHOPEOmni(Date,sc='a',RemoveBinOverlap=True):
 			#now to store the spectra
 			if out[kspec] is None:
 				out[kspec] = PSpecCls(SpecType=spectype,ylabel=ylabel,zlabel=zlabel,ScaleType='positive',ylog=True,zlog=True)
-			out[kspec].AddData(sDate,sut,sEpoch,E0,E1,Em,s,Meta=meta[k],Label='HOPE',Moments=moms)
+			out[kspec].AddData(sDate,sut,sEpoch,E0,E1,Em,s,Meta=meta[k],Label='HOPE',Moments=moms,Counts=cts,Errors=err)
 			
 
 	return out	
