@@ -6,7 +6,7 @@ from .ReadCDF import ReadCDF
 from scipy.interpolate import interp1d
 from ..Tools.RelVelocity import RelVelocity
 from ..Tools.FitMaxwellianDist import FitMaxwellianDist
-from ..Tools.IntegrateFluxes import IntegrateFluxes
+from ..Tools.IntegrateFluxes import IntegrateFluxesDensity
 import DateTimeTools as TT
 from .. import Globals
 import os

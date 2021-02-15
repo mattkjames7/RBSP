@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .MaxwellBoltzmannDist import MaxwellBoltzmannDist
 from .RelVelocity import RelVelocity
-from .IntegrateFluxes import IntegrateFluxes,IntegrateFluxesPressure,IntegrateFluxesTemperature
+from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,IntegrateFluxesTemperature
 from .PSDtoFlux import PSDtoFlux
 from scipy.special import erfinv
 
@@ -89,15 +89,15 @@ def TestIntegrate(fig=None,maps=[1,1,0,0],ncm=500.0,TeV=0.25,ueff=8000.0,Emin=1.
 	#Calculate the flux
 	fH = FH/(4*np.pi*vH**2)
 	FluxH = PSDtoFlux(vH,fH,m)
-	
+	Ebulk=0.0
 	#calcualte nPEND
-	nPEND = IntegrateFluxes(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,1.0)[0]
+	nPEND = IntegrateFluxesDensity(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,Vsc,Ebulk)[0]
 	print('nPEND (cm^-3): ',nPEND)
 	
 	#get the pressure and temperature
-	TPEND = IntegrateFluxesTemperature(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,1.0)[0]
+	TPEND = IntegrateFluxesTemperature(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,Vsc,Ebulk)[0]
 	print('TPEND (K): ',TPEND)	
-	pPEND = IntegrateFluxesPressure(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,1.0)[0]
+	pPEND = IntegrateFluxesPressure(np.array([EH]),np.array([E0]),np.array([E1]),np.array([FluxH]),m,4*np.pi,Vsc,Ebulk)[0]
 	print('pPEND (nPa): ',pPEND*1e9)
 	
 	#another TPEND from genestreti et al

@@ -4,6 +4,6 @@ from .loess import loess
 from .RelVelocity import RelVelocity
 from .MaxwellBoltzmannDist import MaxwellBoltzmannDist
 from .IntegrateSpectrum import IntegrateSpectrum
-from .IntegrateFluxes import IntegrateFluxes
+from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,IntegrateFluxesPressure,IntegrateFluxesNTP
 from . import TestSpectrum
 from .TestIntegrate import TestIntegrate

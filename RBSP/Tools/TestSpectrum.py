@@ -15,7 +15,7 @@ from ..Pos.GetVelocity import GetVelocity
 from ..Fields.GetData import GetData
 from .RelEnergy import RelEnergy
 from .MaxwellBoltzmannDist import MaxwellBoltzmannDist
-from .IntegrateFluxes import IntegrateFluxes,IntegrateFluxesPressure,IntegrateFluxesTemperature
+from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,IntegrateFluxesTemperature
 from .IntegrateSpectrum import IntegrateSpectrum
 
 '''

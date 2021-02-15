@@ -1,6 +1,6 @@
 import numpy as np
 
-def IntegrateFluxes(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
+def IntegrateFluxesDensity(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	'''
 	Integrate the differential number flux as in Genestreti et al 2017
 	in order to get a partial energy number density PEND
@@ -24,7 +24,7 @@ def IntegrateFluxes(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
 	Ejrange = np.array(Erange)*e*1000.0
 
 	#shift the energy by the spacecraft potential
-	Eprime = np.float64(E + np.abs(Vsc)/1000.0)
+	Eprime = np.float64(E + np.abs(Vsc)/1000.0 - Ebulk/1000.0)
 	Ejprime = np.float64(1000*e*Eprime)
 
 	
@@ -47,10 +47,9 @@ def IntegrateFluxes(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
 	return ns
 
 
-def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
+def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	'''
-	Integrate the differential number flux as in Genestreti et al 2017
-	in order to get a partial energy number density PEND
+	Integrate the differential number flux to calculate a pressure.
 	
 	'''
 	if len(np.shape(E)) == 1:
@@ -71,7 +70,7 @@ def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
 	Ejrange = np.array(Erange)*e*1000.0
 
 	#shift the energy by the spacecraft potential
-	Eprime = np.float64(E + np.abs(Vsc)/1000.0)
+	Eprime = np.float64(E + np.abs(Vsc)/1000.0 - Ebulk/1000.0)
 	Ejprime = np.float64(1000*e*Eprime)
 
 	
@@ -94,13 +93,13 @@ def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
 	#the divide by 3 factor comes from somewhere (not sure where exactly, but it appears to correct things)
 	return ps
 	
-def IntegrateFluxesTemperature(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
+def IntegrateFluxesTemperature(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 
 	#get density (convert to m^-3)
-	n = IntegrateFluxes(E,E0,E1,Flux,m,Omega,Vsc,Erange)*1e6
+	n = IntegrateFluxesDensity(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange)*1e6
 	
 	#get pressure in pascals (I think)
-	p = IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Erange)
+	p = IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange)
 	
 	#get energy
 	Te = p/n
@@ -111,3 +110,59 @@ def IntegrateFluxesTemperature(E,E0,E1,Flux,m,Omega,Vsc,Erange=(0.0,np.inf)):
 	T = Te/kB
 
 	return T
+	
+def IntegrateFluxesNTP(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
+	'''
+	Integrate fluxes in units of (keV sr cm^2 s)^-1 to calculate the 
+	density, pressure and temperature in units of m^-3, Pa and K,
+	repsectively.
+	
+	Inputs
+	======
+	E : float
+		1D or 2D array of energy (must match dimensions of E0, E1 and
+		Flux), where E is the energy of the centre of the bin (keV).
+	E0 : float
+		Lower bound of the energy bin (keV).
+	E1 : float
+		Upper bound of the energy bin (keV).
+	Flux : float
+		Measured differential number flux.
+	m : float
+		Particle mass in kg.
+	Omega : float
+		Solid angle (4*pi for HOPE)
+	Vsc : float
+		Array of spacecraft potentials to adjust energies by.
+	Erange : tuple
+		(min,max) tuple of the minimum and maximum energies to integrate 
+		spectra over (keV), by default Erange=(0.0,np.inf).
+	
+	Returns
+	=======
+	n : float
+		Density in SI units (m^-3).
+	T : float
+		Temperature (K).
+	p : float
+		Pressure (Pa).
+	
+	
+	'''
+		
+
+	#get density (convert to m^-3)
+	n = IntegrateFluxesDensity(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange)*1e6
+	
+	#get pressure in pascals (I think)
+	p = IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange)
+	
+	#get energy
+	Te = p/n
+	
+	#convert Joules to Kelvin
+	kB = np.float64(1.38064852e-23)
+
+	T = Te/kB
+
+	return n,T,p
