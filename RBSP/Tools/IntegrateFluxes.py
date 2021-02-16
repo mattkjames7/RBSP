@@ -26,10 +26,11 @@ def IntegrateFluxesDensity(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	#shift the energy by the spacecraft potential
 	Eprime = np.float64(E + np.abs(Vsc)/1000.0 - Ebulk/1000.0)
 	Ejprime = np.float64(1000*e*Eprime)
-
+	
 	
 	#calculate the energy fractions
 	dEE = np.float64((E1-E0)/E)
+	
 	
 	#convert Flux to SI units
 	J = Flux*10.0 # times 10,000 to convert cm^-2 to m^-2, divide by 1000 for keV^-1 to eV^-1
@@ -40,7 +41,7 @@ def IntegrateFluxesDensity(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	for i in range(0,J.shape[0]):
 		use = np.where((Ejprime[i] >= Ejrange[0]) & (Ejprime[i] <= Ejrange[1]))[0]
 		S[i] = np.sum(np.sqrt(Ejprime[i][use])*dEE[i][use]*np.float64(J[i][use]))
-	
+
 	#now get the density estimate (convert to cm^-3)
 	ns = Omega*np.sqrt(m/2)*S/1e6
 	
@@ -72,7 +73,6 @@ def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	#shift the energy by the spacecraft potential
 	Eprime = np.float64(E + np.abs(Vsc)/1000.0 - Ebulk/1000.0)
 	Ejprime = np.float64(1000*e*Eprime)
-
 	
 	#calculate the energy fractions
 	dEE = np.float64((E1-E0)/E)
@@ -86,7 +86,7 @@ def IntegrateFluxesPressure(E,E0,E1,Flux,m,Omega,Vsc,Ebulk,Erange=(0.0,np.inf)):
 	for i in range(0,J.shape[0]):
 		use = np.where((Ejprime[i] >= Ejrange[0]) & (Ejprime[i] <= Ejrange[1]))[0]
 		S[i] = np.sum((Ejprime[i][use]**1.5)*dEE[i][use]*np.float64(J[i][use]))
-	
+
 	#now get the density estimate (convert to cm^-3)
 	ps = 2*Omega*np.sqrt(m/2)*S/3
 	

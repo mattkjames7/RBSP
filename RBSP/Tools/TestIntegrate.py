@@ -5,6 +5,7 @@ from .RelVelocity import RelVelocity
 from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,IntegrateFluxesTemperature
 from .PSDtoFlux import PSDtoFlux
 from scipy.special import erfinv
+from .IntegrateSpectra import IntegrateSpectra
 
 def TestIntegrate(fig=None,maps=[1,1,0,0],ncm=500.0,TeV=0.25,ueff=8000.0,Emin=1.0,Vsc=0.0,necm=500.0):
 	
@@ -106,5 +107,11 @@ def TestIntegrate(fig=None,maps=[1,1,0,0],ncm=500.0,TeV=0.25,ueff=8000.0,Emin=1.
 	
 	print('TPEND (G2017) (eV) : ',TPENDGeV)
 	print('TPEND (G2017) (K) : ',TPENDG)
+	
+	
+	n1,T1,p1 = IntegrateSpectra(EH,E0,E1,FluxH,m,4*np.pi,Vsc,ueff)
+	print('n (cm^-3): ',n1/1e6)
+	print('T (K): ',T1)
+	print('p (nPa)',p1*1e9)
 	
 	return ax
