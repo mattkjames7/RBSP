@@ -16,7 +16,7 @@ from .. import EMFISIS
 from ..Tools.ConvertTime import ConvertTime
 import DateTimeTools as TT
 
-def CombineFields(Date,sc):
+def CombineFields(Date,sc,Overwrite=False):
 	'''
 	Combine the electric and magnetic fields together (where possible).
 	The electric field will be rotated from the mGSE coordinate system 
@@ -35,6 +35,14 @@ def CombineFields(Date,sc):
 		
 		
 	'''
+	#check it exists
+	outdir = _Fields.datapath.format(sc)
+	if not os.path.isdir(outdir):
+		os.system('mkdir -pv '+outdir)
+	fname = outdir + '{:08d}.bin'.format(Date)
+	if os.path.isfile(fname) and not Overwrite:
+		print('File exists, use "Overwrite" option to update the file')
+		return
 	
 	#read the E data in
 	print('Reading E field data')
@@ -117,9 +125,9 @@ def CombineFields(Date,sc):
 		out.EySM[:] = np.nan
 		out.EzSM[:] = np.nan
 	
-		out.ExP[:] = np.nan
-		out.EyT[:] = np.nan
-		out.EzC[:] = np.nan
+		out.EP[:] = np.nan
+		out.ET[:] = np.nan
+		out.EC[:] = np.nan
 	
 	#convert to other coordinate systems
 	#GSM
@@ -157,10 +165,6 @@ def CombineFields(Date,sc):
 			pass
 	
 	#save the file
-	outdir = _Fields.datapath.format(sc)
-	if not os.path.isdir(outdir):
-		os.system('mkdir -pv '+outdir)
-	fname = outdir + '{:08d}.bin'.format(Date)
 	print('Saving: {:s}'.format(fname))
 	RT.SaveRecarray(out,fname)
 	

@@ -26,6 +26,10 @@ def _SavePotential(Date,sc):
 	are bad potentials, then they will be replaced with potentials 
 	calculated from EMFISIS electron densities.
 	
+	NOTE: Any dates which are requested where there are no EFW data, 
+	will be completely made up using the EMFISIS electron density as a
+	proxy for the potential.
+	
 	
 	'''
 	
@@ -56,7 +60,7 @@ def _SavePotential(Date,sc):
 		out.neFlag = 0.0
 	except:
 		#create an empty array
-		ut = np.arange(0.0,86400.0,11.0)
+		ut = np.arange(0.0,86400.0,10.0)/3600.0
 		n = ut.size
 		out = np.recarray(n,dtype=_EFW.pdtype)
 		
@@ -93,13 +97,12 @@ def _SavePotential(Date,sc):
 		#interpolate bad densities
 		out.ne[badn] = femf(out.utc[badn])
 		
-		
 	except:
 		print('EMFISIS fail')
 		pass
 	
 	#fill in the bad potentials
-	out.Vsc[badv] = fVsc(out.utc[badv])
+	out.Vsc[badv] = fVsc(out.ne[badv])
 	
 	#save the file
 	outdir = Globals.DataPath + 'Potential/{:s}/'.format(sc)
