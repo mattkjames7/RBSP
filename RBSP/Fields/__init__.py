@@ -1,4 +1,4 @@
-from .ConvertEFieldDay import ConvertEFieldDay
+from .CombineFields import CombineFields
 from .TestSmoothing import TestSmoothing
 from . import SmoothFuncs
 from .ModelField import ModelField

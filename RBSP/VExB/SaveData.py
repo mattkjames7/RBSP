@@ -9,7 +9,7 @@ import kpindex
 from .VExB import VExB
 import RecarrayTools as RT
 import os
-from ..Fields.ConvertEFieldDay import ConvertEFieldDay
+from ..Fields.CombineFields import CombineFields
 import vsmodel
 import pyomnidata as omni
 
