@@ -23,8 +23,8 @@ def URL(sc,L):
 	
 		#get the date
 		Year,Month,Day = TT.DateSplit(Date)
-	
-		url0 = 'https://emfisis.physics.uiowa.edu/Flight/RBSP-{:s}/{:s}/{:4d}/{:02d}/{:02d}/'.format(scu,Lu,Year,Month,Day)
+
+		url0 = 'https://emfisis.physics.uiowa.edu/Flight/RBSP-{:s}/{:s}/{:4d}/{:02d}/{:02d}/'.format(scu,Lu,Year[0],Month[0],Day[0])
 
 		return url0
 	
