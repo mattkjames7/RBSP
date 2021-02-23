@@ -7,3 +7,4 @@ from .IntegrateSpectrum import IntegrateSpectrum
 from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,IntegrateFluxesPressure,IntegrateFluxesNTP
 from . import TestSpectrum
 from .TestIntegrate import TestIntegrate
+from .TestIonMoments import TestIonMoments

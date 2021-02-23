@@ -559,7 +559,7 @@ class PSpecCls(object):
 			
 			
 			#get the combined spectra
-			E,spec,labs = self.GetSpectrum(Date,ut,Method,Maxdt,False,'E','PSD')
+			E,spec,_,labs = self.GetSpectrum(Date,ut,Method,Maxdt,False,'E','PSD')
 			e = 1.6022e-19
 			v = RelVelocity(E,self.Mass)
 		

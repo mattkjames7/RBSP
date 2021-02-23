@@ -11,3 +11,5 @@ from .ReadHOPEOmni import ReadHOPEOmni
 #from .ReadMoments import ReadMoments
 from .SaveIonMoments import SaveIonMoments
 from .ReadIonMoments import ReadIonMoments
+from .MomentAvailability import MomentAvailability
+from .CalculateIonMoments import CalculateIonMoments
