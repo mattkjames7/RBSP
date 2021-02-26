@@ -41,7 +41,9 @@ idtype = [	('Date','int32'),			#Date in the format yyyymmdd
 			('He_Ebulk','float32'),		# bulk energy, keV
 			('O_Ebulk','float32'),		# bulk energy, keV
 			('Vsc','float32'),			#spacecraft potential, Volts
-			('ne','float32'),			#Electron density according to EFW or EMFISIS
+			('Emin','float32'),			#Minimum HOPE energy (keV)
+			('ne','float32'),			#Electron density according to EFW or EMFISIS (m^-3)
+			('ni_c','float32'),			#Number of ions (before rescaling to match electrons) (m^-3)
 			('H_n_h','float32'),		#Original density m^-3 (hot ions > 3e eV/electrons > 200eV)
 			('H_T_h','float32'),		#T = (Tpar + 2*Tperp)/3 K  (hot ions > 3e eV/electrons > 200eV)
 			('H_p_h','float32'),		#pressure (Pa)  (hot ions > 3e eV/electrons > 200eV)

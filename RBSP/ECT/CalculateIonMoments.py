@@ -173,7 +173,8 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	print('Rescaling moments using electron density')
 	#get total ions
 	nI = nH + nHe + nO
-		
+	out.ni_c = nI
+	
 	#work out fractions
 	fH = nH/nI
 	fHe = nHe/nI
@@ -203,6 +204,9 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	print('Calculating temperatures')
 	#calculate Ehope min and then the difference between that and the bulk energy
 	Ehmin = sH.Energy[0][:,0] + out.Vsc/1000.0
+	#this may or may not be a fudge (genuinely not sure)
+	Ehmin = 0.001 + out.Vsc/1000.0
+	out.Emin = Ehmin
 	dEH = (Ehmin - out.H_Ebulk)*1000.0*e
 	dEHe = (Ehmin - out.He_Ebulk)*1000.0*e
 	dEO = (Ehmin - out.O_Ebulk)*1000.0*e

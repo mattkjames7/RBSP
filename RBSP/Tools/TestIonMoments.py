@@ -33,7 +33,7 @@ def TestIonMoments(Date=20130115,sc='a',MaxE=0.02):
 	
 	ax1 = fig.subplot2grid((4,2),(0,1))
 	ax1.plot(data.utc,data.H_T_c[:],color=[1.0,0.0,0.0,0.7],label='H$^+$')
-	ax1.set_ylim(1000.0,160000.0)
+	ax1.set_ylim(1000.0,1000000.0)
 	ax1.set_yscale('log')
 	ax1.set_ylabel('$T_H$ (K)')
 	ax1.set_xlabel('')
@@ -51,7 +51,7 @@ def TestIonMoments(Date=20130115,sc='a',MaxE=0.02):
 	
 	ax3 = fig.subplot2grid((4,2),(1,1))
 	ax3.plot(data.utc,data.He_T_c[:],color=[0.0,1.0,0.0,0.7],label='He$^+$')
-	ax3.set_ylim(1000.0,160000.0)
+	ax3.set_ylim(1000.0,1000000.0)
 	ax3.set_yscale('log')
 	ax3.set_ylabel('$T_{He}$ (K)')
 	ax3.set_xlabel('')
@@ -70,7 +70,7 @@ def TestIonMoments(Date=20130115,sc='a',MaxE=0.02):
 	ax5 = fig.subplot2grid((4,2),(2,1))
 	ax5.plot(data.utc,data.O_T_c[:,0],color=[0.0,0.0,0.4,0.7],label='O$^+_0$')
 	ax5.plot(data.utc,data.O_T_c[:,1],color=[0.0,0.0,1.0,0.7],label='O$^+_1$')
-	ax5.set_ylim(200.0,1000000.0)
+	ax5.set_ylim(200.0,5000000.0)
 	ax5.set_yscale('log')
 	ax5.set_ylabel('$T_{O}$ (K)')
 	ax5.set_xlabel('')
