@@ -202,11 +202,12 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 		out.Rescaled = False
 		out.ne = nI
 	else:
-		good = np.where(np.isfinite(out.ne))[0]
+		good = np.where(np.isfinite(out.ne) & np.isfinite(nH))[0]
 		out.Rescaled[good] = True
 	scale = out.ne/nI
 	bad = np.where(np.isfinite(scale) == False)[0]
 	scale[bad] = 1.0
+	out.Rescaled[bad] = False
 	
 	#scale densities and pressures up
 	nH *= scale
