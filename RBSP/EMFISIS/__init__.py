@@ -21,3 +21,4 @@ from .ReadCDF import ReadCDF
 from .InterpObj import InterpObj
 from .DataAvailability import DataAvailability
 from .CheckData import CheckData
+from .ReadElectronDensity import ReadElectronDensity

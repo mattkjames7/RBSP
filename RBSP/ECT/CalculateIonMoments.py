@@ -144,7 +144,18 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	if not no_ne:
 		fne = interp1d(utcne,ne,fill_value=(ne[0],ne[-1]),bounds_error=False)
 		out.ne = fne(out.utc)*1e6
-	
+		
+		#find any gaps
+		dt = utcne[1:] - utcne[:-1]
+		gap = np.where(dt > 5/60.0)[0]
+
+		if gap.size > 0:
+			for g in gap:
+				t0 = utcne[g]
+				t1 = utcne[g+1]
+				use = np.where((out.utc > t0) & (out.utc < t1))[0]	
+				out.ne[use] = np.nan
+
 
 	print('Creating Interpolation Objects')
 	#create an interp object for pot
@@ -191,8 +202,11 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 		out.Rescaled = False
 		out.ne = nI
 	else:
-		out.Rescaled = True
+		good = np.where(np.isfinite(out.ne))[0]
+		out.Rescaled[good] = True
 	scale = out.ne/nI
+	bad = np.where(np.isfinite(scale) == False)[0]
+	scale[bad] = 1.0
 	
 	#scale densities and pressures up
 	nH *= scale
