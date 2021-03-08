@@ -76,12 +76,17 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	
 	#calcualte time arrays and extract densities
 	if not uhr is None:
-		du,tu = TT.CDFEpochtoDate(uhr['Epoch'])
-		utcu = TT.ContUT(du,tu)
-		nu = uhr['density']
-		good = np.where(np.isfinite(nu) & (nu > 0))[0]
-		utcu = utcu[good]
-		nu = nu[good]
+		if uhr['Epoch'] is None:
+			uhr = None
+			utcu = []
+			nu = []
+		else:
+			du,tu = TT.CDFEpochtoDate(uhr['Epoch'])
+			utcu = TT.ContUT(du,tu)
+			nu = uhr['density']
+			good = np.where(np.isfinite(nu) & (nu > 0))[0]
+			utcu = utcu[good]
+			nu = nu[good]
 	else:
 		utcu = []
 		nu = []
@@ -96,7 +101,7 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	else:
 		utce = []
 		ne = []
-	
+
 	#scan for gaps in uhr data > 5 minutes
 	no_ne = False
 	if not uhr is None:
@@ -179,18 +184,15 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	fH = nH/nI
 	fHe = nHe/nI
 	fO = nO/nI
-	
-	print(nI[0],nH[0],nHe[0],nO[0])
-	print(fH[0],fHe[0],fO[0])
+
 	
 	#work out scaling factor to correct densities
 	if no_ne:
-		out.Rescaled = True
+		out.Rescaled = False
 		out.ne = nI
 	else:
-		out.Rescaled = False
+		out.Rescaled = True
 	scale = out.ne/nI
-	print(scale[0])
 	
 	#scale densities and pressures up
 	nH *= scale
@@ -199,13 +201,12 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	pHe *= scale
 	nO *= scale
 	pO *= scale
-	print(nI[0],nH[0],nHe[0],nO[0])
 		
 	print('Calculating temperatures')
 	#calculate Ehope min and then the difference between that and the bulk energy
 	Ehmin = sH.Energy[0][:,0] + out.Vsc/1000.0
 	#this may or may not be a fudge (genuinely not sure)
-	Ehmin = 0.001 + out.Vsc/1000.0
+	#Ehmin = 0.001 + out.Vsc/1000.0
 	out.Emin = Ehmin
 	dEH = (Ehmin - out.H_Ebulk)*1000.0*e
 	dEHe = (Ehmin - out.He_Ebulk)*1000.0*e

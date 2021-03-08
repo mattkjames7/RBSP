@@ -3,7 +3,7 @@ from .ReadCDF import ReadCDF
 from ..Tools.PSpecCls import PSpecCls
 import DateTimeTools as TT
 from ..Tools.ProcessEnergyBins import ProcessEnergyBins
-from .ReadMoments import ReadMoments
+from .ReadIonMoments import ReadIonMoments
 
 def ReadHOPEOmni(Date,sc='a',RemoveBinOverlap=True):
 	'''
@@ -106,8 +106,12 @@ def ReadHOPEOmni(Date,sc='a',RemoveBinOverlap=True):
 			E0,E1,Em = ProcessEnergyBins(ke,kde)
 			
 			#try to get the moments
-			moms = ReadMoments(Date,sc,kout.strip('+'))
-			if moms.size == 0:
+			try:
+				moms = ReadIonMoments(Date,sc)
+				if moms.size == 0:
+					moms = None
+			except:
+				print('Something went wrong while reading moments')
 				moms = None
 				
 			#now to store the spectra

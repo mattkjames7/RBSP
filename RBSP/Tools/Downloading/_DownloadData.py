@@ -9,7 +9,6 @@ from ._UpdateDataIndex import _UpdateDataIndex
 import RecarrayTools as RT
 from ._ExtractDateVersion import _ExtractDateVersion
 from ._ReduceDownloadList import _ReduceDownloadList
-from ..ListDates import ListDates
 
 def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],
 				vfmt='v\d\d.\d\d',FContains=None,Overwrite=False,
@@ -47,7 +46,7 @@ def _DownloadData(URLF,fname,outpath,Date=[20120101,20200101],
 	if np.size(Date) == 1:
 		dates = np.array([Date])
 	elif np.size(Date) == 2:
-		dates = ListDates(Date[0],Date[1])
+		dates = TT.ListDates(Date[0],Date[1])
 	else:
 		dates = np.array([Date]).flatten()
 	n = dates.size

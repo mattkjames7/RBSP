@@ -6,7 +6,20 @@ import os
 
 def ReadIonMoments(Date,sc):
 	'''
+	Read in the corrected ion moments calculated using the HOPE spectra
+	alongside EMFISIS and EFW.
 	
+	Inputs
+	======
+	Date : int
+		Date in the format yyyymmdd
+	sc : str
+		'a' or 'b'
+		
+	Returns
+	=======
+	data : numpy.recarray
+		Ion moment data
 	
 	'''
 		

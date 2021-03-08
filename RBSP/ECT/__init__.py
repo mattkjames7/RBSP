@@ -7,8 +7,6 @@ from .RebuildDataIndex import RebuildDataIndex
 from .ReadHOPESA import ReadHOPESA
 from .ReadHOPEMoments import ReadHOPEMoments
 from .ReadHOPEOmni import ReadHOPEOmni
-#from .SaveMoments import SaveMoments
-#from .ReadMoments import ReadMoments
 from .SaveIonMoments import SaveIonMoments
 from .ReadIonMoments import ReadIonMoments
 from .MomentAvailability import MomentAvailability

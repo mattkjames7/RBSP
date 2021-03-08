@@ -18,6 +18,7 @@ from .RelVelocity import RelVelocity
 from .IntegrateSpectrum import IntegrateSpectrum
 from .. import ECT
 from .RelEnergy import RelEnergy
+from .Maxwellian import GetMaxwellianFunction,Maxwellian,FitMaxwellian
 
 defargs = {	'Meta' : None,
 			'dt' : None,
@@ -205,24 +206,143 @@ class PSpecCls(object):
 		self.n += 1
 	
 	
-	def _GetSpectrum(self,I,sutc,dutc,Method,xparam,yparam):
+	# def _GetSpectrum(self,I,sutc,dutc,Method,xparam,yparam):
+	
+		# #get the appropriate data
+		# l = self.Label[I]
+		# utc = self.utc[I]
+		# if xparam == 'V':
+			# Y = self.V[I]
+		# else:
+			# Y = self.Energy[I]
+			
+		# if yparam == 'PSD':
+			# Spec = self.PSD[I]		
+		# else:
+			# Spec = self.Spec[I]	
+			
+		# Err = self.Errors[I]
+		# if Err is None:
+			# Err = np.zeros(Spec.shape,dtype='float32') + np.nan	
+		
+		# #find the nearest
+		# dt = np.abs(utc - sutc)
+		# near = np.where(dt == dt.min())[0][0]
+		
+		# #check if the nearest is within dutc
+		# if dt[near] > dutc:
+			# return [],[],[],[]
+			
+		
+		# #check if we are past the end of the time series, or Method is nearest
+		# if (Method == 'nearest') or (sutc < utc[0]) or (sutc > utc[-1]):
+			# z = Spec[near,:]
+			# if len(Y.shape) == 2:
+				# y = Y[near,:]
+			# else:
+				# y = Y
+
+			# e = Err[near,:]*z
+		# else:
+			# #in this case we need to find the two surrounding neighbours
+			# #and interpolate between them
+			# bef = np.where(utc <= sutc)[0][-1]
+			# aft = np.where(utc > sutc)[0][0]
+			
+			# z0 = Spec[bef,:]
+			# z1 = Spec[aft,:]
+			
+			# e0 = Err[bef,:]
+			# e1 = Err[aft,:]
+			
+			# if len(f.shape) == 2:
+				# y0 = Y[near,:]
+				# y1 = Y[near,:]
+			# else:
+				# y0 = Y
+				# y1 = Y
+			
+			# dx = utc[aft] - utc[bef]
+			# dz = z1 - z0
+			# dy = y1 - y0
+			# de = e1 - e0
+			
+			# dzdx = dz/dx
+			# dydx = dy/dx
+			# dedx = de/dx
+			
+			# dt = sutc - utc[bef]
+			
+			# z = z0 + dt*dzdx
+			# y = y0 + dt*dydx
+			# e = e0 + dt*dedx
+		
+			# e = e*z
+		
+		# #remove rubbish
+		# good = np.where(y > 0)[0]
+		# y = y[good]
+		# z = z[good]
+		# e = e[good]
+			
+		# #sort by y
+		# srt = np.argsort(y)
+		# e = e[srt]
+		# y = y[srt]
+		# z = z[srt]
+		# return y,z,e,l
+	def _GetSpectrum(self,I,sutc,dutc):
+		'''
+		Find the nearest instance of a spectrum.
+		
+		Inputs
+		======
+		I : int
+			Index corresponding to the spectrogram stored int he object
+			(there may be multiple)
+		sutc : float
+			The time of the spectrum (continuous time from 1950)
+		dutc : float
+			Maximum difference in time between sutc and the nearest 
+			spectrum (in hours)
+			
+		Returns
+		=======
+		near : int
+			Time index of spectrum
+		v : float
+			velocity array (m/s)
+		e : float
+			energy array (keV)
+		cts : float
+			Count spectrum
+		flux : float
+			Flux spectrum (keV^-1 s^-1 cm^-2 sr^-1)
+		psd : float
+			Phase space density (m^-6 s^3)
+		err : float
+			Poisson error
+		lab : str
+			Label corresponding to the instrument/submodule
+		
+		
+		'''
+	
 	
 		#get the appropriate data
 		l = self.Label[I]
 		utc = self.utc[I]
-		if xparam == 'V':
-			Y = self.V[I]
-		else:
-			Y = self.Energy[I]
-			
-		if yparam == 'PSD':
-			Spec = self.PSD[I]		
-		else:
-			Spec = self.Spec[I]	
-			
+		V = self.V[I]
+		E = self.Energy[I]		
+		PSD = self.PSD[I]		
+		Flux = self.Spec[I]	
+		Counts = self.Counts[I]	
 		Err = self.Errors[I]
+		if Counts is None:
+			Counts = np.zeros(Counts.shape,dtype='float32') + np.nan	
 		if Err is None:
-			Err = np.zeros(Spec.shape,dtype='float32') + np.nan	
+			Err = np.zeros(Flux.shape,dtype='float32') + np.nan	
+		lab = self.Label[I]
 		
 		#find the nearest
 		dt = np.abs(utc - sutc)
@@ -230,66 +350,40 @@ class PSpecCls(object):
 		
 		#check if the nearest is within dutc
 		if dt[near] > dutc:
-			return [],[],[],[]
+			return []*6
 			
 		
 		#check if we are past the end of the time series, or Method is nearest
-		if (Method == 'nearest') or (sutc < utc[0]) or (sutc > utc[-1]):
-			z = Spec[near,:]
-			if len(Y.shape) == 2:
-				y = Y[near,:]
-			else:
-				y = Y
-
-			e = Err[near,:]*z
+		flux = Flux[near,:]
+		psd = PSD[near,:]
+		if len(V.shape) == 2:
+			v = V[near,:]
+			e = E[near,:]
 		else:
-			#in this case we need to find the two surrounding neighbours
-			#and interpolate between them
-			bef = np.where(utc <= sutc)[0][-1]
-			aft = np.where(utc > sutc)[0][0]
-			
-			z0 = Spec[bef,:]
-			z1 = Spec[aft,:]
-			
-			e0 = Err[bef,:]
-			e1 = Err[aft,:]
-			
-			if len(f.shape) == 2:
-				y0 = Y[near,:]
-				y1 = Y[near,:]
-			else:
-				y0 = Y
-				y1 = Y
-			
-			dx = utc[aft] - utc[bef]
-			dz = z1 - z0
-			dy = y1 - y0
-			de = e1 - e0
-			
-			dzdx = dz/dx
-			dydx = dy/dx
-			dedx = de/dx
-			
-			dt = sutc - utc[bef]
-			
-			z = z0 + dt*dzdx
-			y = y0 + dt*dydx
-			e = e0 + dt*dedx
-		
-			e = e*z
+			v = V
+			e = E
+		cts = Counts[near,:]
+		err = Err[near,:]
+
 		
 		#remove rubbish
-		good = np.where(y > 0)[0]
-		y = y[good]
-		z = z[good]
+		good = np.where(v > 0)[0]
+		v = v[good]
 		e = e[good]
-			
+		err = err[good]
+		psd = psd[good]
+		flux = flux[good]
+		cts = cts[good]
+		
 		#sort by y
-		srt = np.argsort(y)
+		srt = np.argsort(v)
 		e = e[srt]
-		y = y[srt]
-		z = z[srt]
-		return y,z,e,l
+		v = v[srt]
+		psd = psd[srt]
+		flux = flux[srt]
+		cts = cts[srt]
+		err = err[srt]
+		return near,v,e,cts,flux,psd,err,lab
 		
 	def _GetMoment(self,I,sutc,dutc):
 	
@@ -308,7 +402,78 @@ class PSpecCls(object):
 		
 
 	
-	def GetSpectrum(self,Date,ut,Method='nearest',Maxdt=60.0,Split=False,xparam='E',yparam='Flux'):
+	# def GetSpectrum(self,Date,ut,Method='nearest',Maxdt=60.0,Split=False,xparam='E',yparam='Flux'):
+		# '''
+		# This method will return a spectrum from a given time.
+		
+		# Inputs
+		# ======
+		# Date : int
+			# Date in format yyyymmdd
+		# ut : float
+			# Time in hours since beginning of the day
+		# Method : str
+			# 'nearest'|'interpolate' - will find the nearest spectrum to
+			# the time specified time, or will interpolate between two 
+			# surrounding spectra.
+		# Maxdt : float
+			# Maximum difference in time between the specified time and the
+			# time of the spectra in seconds.
+		# Split : bool
+			# If True, the spectra will be returned as a list, if False,
+			# they will be combined to form a single spectrum.
+		# xparam : str
+			# Sets the x-axis of the returned spectrum to be either energy
+			# (keV) or velocity (m/s): 'E'|'V'
+		# yparam : str
+			# Sets the type of spectrum output to either differential
+			# energy flux or phase space density: 'Flux'|'PSD'
+		
+		# Returns
+		# =======
+		# energy : float/list
+			# Array(s) of energies or velocities
+		# spec : float/list
+			# Array(s) containing specral data
+		# err : float/list
+			# Array(s) containing error bars
+		# labs : list
+			# List of plot labels
+		
+		# '''
+	
+		# #convert to continuous time
+		# utc = TT.ContUT(np.array([Date]),np.array([ut]))[0]
+		# dutc = Maxdt/3600.0
+		
+		# #create the objects to store spectra and energy bins
+		# spec = []
+		# energy = []
+		# labs = []
+		# err = []
+		
+		# #get the spectra for each element in  self.Spec
+		# for i in range(0,self.n):
+			# y,z,e,l = self._GetSpectrum(i,utc,dutc,Method,xparam,yparam)
+			# if len(z) > 0:
+				# spec.append(z)
+				# energy.append(y)
+				# labs.append(l)
+				# err.append(e)
+			
+		# #combine if necessary
+		# if not Split:
+			# spec = np.concatenate(spec)
+			# energy = np.concatenate(energy)
+			# err = np.concatenate(err)
+			# srt = np.argsort(energy)
+			# spec = spec[srt]
+			# energy = energy[srt]
+			# err = err[srt]
+
+		# return energy,spec,err,labs
+		
+	def GetSpectrum(self,Date,ut,Maxdt=60.0,Split=False):
 		'''
 		This method will return a spectrum from a given time.
 		
@@ -337,10 +502,18 @@ class PSpecCls(object):
 		
 		Returns
 		=======
+		inds : int/list
+			Time axis index/indices
+		vel : float/list
+			Array(s) of velocities in m/s 
 		energy : float/list
-			Array(s) of energies or velocities
-		spec : float/list
-			Array(s) containing specral data
+			Array(s) of energies in keV
+		cts : float/list
+			Array(s) of counts
+		flux : float/list
+			Array(s) of flux in (keV s sr cm^2)^-1
+		psd : float/list
+			Array(s) containing phase space density (m^-6 s^3)
 		err : float/list
 			Array(s) containing error bars
 		labs : list
@@ -350,34 +523,51 @@ class PSpecCls(object):
 	
 		#convert to continuous time
 		utc = TT.ContUT(np.array([Date]),np.array([ut]))[0]
-		dutc = Maxdt/3600.0
+		dutc = Maxdt/60.0
 		
 		#create the objects to store spectra and energy bins
-		spec = []
+		cts = []
+		flux = []
+		psd = []
 		energy = []
+		vel = []
 		labs = []
 		err = []
+		inds = []
 		
 		#get the spectra for each element in  self.Spec
 		for i in range(0,self.n):
-			y,z,e,l = self._GetSpectrum(i,utc,dutc,Method,xparam,yparam)
-			if len(z) > 0:
-				spec.append(z)
-				energy.append(y)
-				labs.append(l)
-				err.append(e)
+			S = self._GetSpectrum(i,utc,dutc)
+			#S = near,v,e,cts,flux,psd,err
+			if len(S[1]) > 0:
+				inds.append(S[0])
+				vel.append(S[1])
+				energy.append(S[2])
+				cts.append(S[3])
+				flux.append(S[4])
+				psd.append(S[5])
+				err.append(S[6])
+				labs.append(S[7])
 			
 		#combine if necessary
+		inds = np.array(inds)
 		if not Split:
-			spec = np.concatenate(spec)
+			psd = np.concatenate(psd)
+			flux = np.concatenate(flux)
 			energy = np.concatenate(energy)
+			vel = np.concatenate(vel)
 			err = np.concatenate(err)
+			cts = np.concatenate(cts)
+			
 			srt = np.argsort(energy)
-			spec = spec[srt]
+			psd = psd[srt]
+			flux = flux[srt]
+			vel = vel[srt]
 			energy = energy[srt]
 			err = err[srt]
+			cts = cts[srt]
 
-		return energy,spec,err,labs
+		return inds,vel,energy,cts,flux,psd,err,labs
 		
 	def GetMoments(self,Date,ut,Maxdt=60.0):
 		'''
@@ -401,7 +591,6 @@ class PSpecCls(object):
 			and temperatures in MK.
 		
 		'''
-	
 		#convert to continuous time
 		utc = TT.ContUT(np.array([Date]),np.array([ut]))[0]
 		dutc = Maxdt/3600.0
@@ -421,7 +610,7 @@ class PSpecCls(object):
 		ind0 = np.array(ind0)
 		ind1 = np.array(ind1)
 		if ind0.size > 0:
-			moment = np.recarray(ind0.size,dtype=ECT._ECT.mdtype)
+			moment = np.recarray(ind0.size,dtype=ECT._ECT.idtype)
 			for i in range(0,ind0.size):
 				moment[i] = self.Moments[ind0[i]][ind1[i]]
 		else:
@@ -429,10 +618,260 @@ class PSpecCls(object):
 		
 		return moment
 		
-	def PlotSpectrum(self,Date,ut,Method='nearest',Maxdt=60.0,Split=False,
+	# def PlotSpectrum(self,Date,ut,Method='nearest',Maxdt=60.0,Split=False,
+		# fig=None,maps=[1,1,0,0],color=None,xlog=True,ylog=None,xparam='E',yparam='Flux',
+		# FitKappa=False,FitMaxwellian=False,nox=False,noy=False,Erange=(0.0,np.inf),
+		# MaxIter=None,n0=10.0,T0=100.0,Integrate=False,ShowMoments=False):
+		# '''
+		# This method will plot a spectrum from a given time.
+		
+		# Inputs
+		# ======
+		# Date : int
+			# Date in format yyyymmdd
+		# ut : float
+			# Time in hours since beginning of the day
+		# Method : str
+			# 'nearest'|'interpolate' - will find the nearest spectrum to
+			# the time specified time, or will interpolate between two 
+			# surrounding spectra.
+		# Maxdt : float
+			# Maximum difference in time between the specified time and the
+			# time of the spectra in seconds.
+		# Split : bool
+			# If True, the spectra will be returned as a list, if False,
+			# they will be combined to form a single spectrum.
+		# xparam : str
+			# Sets the x-axis of the returned spectrum to be either energy
+			# (keV) or velocity (m/s): 'E'|'V'
+		# yparam : str
+			# Sets the type of spectrum output to either differential
+			# energy flux or phase space density: 'Flux'|'PSD'
+		# fig : None, matplotlib.pyplot or matplotlib.pyplot.Axes instance
+			# If None - a new plot is created
+			# If an instance of pyplot then a new Axes is created on an existing plot
+			# If Axes instance, then plotting is done on existing Axes
+		# maps : list
+			# [xmaps,ymaps,xmap,ymap] controls position of subplot
+		# xlog : bool
+			# if True, x-axis is logarithmic
+		# ylog : bool
+			# If True, y-axis is logarithmic
+		# FitMaxwellian : bool or str
+			# If True - the PSD will be used to fit a Maxwellian 
+			# distribution, if 'counts' then the counts will be used 
+			# instead.
+		# FitKappa : bool or str
+			# If True - the PSD will be used to fit a Kappa
+			# distribution, if 'counts' then the counts will be used 
+			# instead.		
+		# Erange : tuple
+			# Minimum and maximum energy to fit distribution function 
+			# against (keV)
+		# MaxIter : None,int
+			# Maximum number of iterations for the spectrum fitting.
+		# n0 : float
+			# Initial density required for the spectral fitting (cm^-3).
+		# T0 : float
+			# Initial temperature for fitting spectrum (MK).
+				
+		# '''	
+		
+		# #get the spectra
+		# energy,spec,err,labs = self.GetSpectrum(Date,ut,Method,Maxdt,Split,xparam,yparam)
+		
+		
+		# #create the figure
+		# if fig is None:
+			# fig = plt
+			# fig.figure()
+		# if hasattr(fig,'Axes'):	
+			# ax = fig.subplot2grid((maps[1],maps[0]),(maps[3],maps[2]))
+		# else:
+			# ax = fig	
+			
+		# #plot
+		# if Split:
+			# if not color is None:
+				# nc = len(color)
+			# for i in range(0,len(spec)):
+				# bad = np.where((np.isfinite(spec[i]) == False) | (spec[i] == 0.0))[0]
+				# spec[i][bad] = np.nan
+				# if color is None:
+					# #ax.plot(energy[i],spec[i],label=labs[i],marker='.')
+					# ax.errorbar(energy[i],spec[i],yerr=err[i],marker='.')
+				# else:
+					# #ax.plot(energy[i],spec[i],color=color[i % nc],label=labs[i],marker='.')
+					# ax.errorbar(energy[i],spec[i],yerr=err[i],color=color[i % nc],marker='.',label=labs[i])
+			
+		# else:
+			# bad = np.where((np.isfinite(spec) == False) | (spec == 0.0))[0]
+			# spec[bad] = np.nan
+			# #ax.plot(energy,spec,color=color,marker='.')
+			# ax.errorbar(energy,spec,yerr=err,color=color,marker='.')
+
+		# #set the x-axis scale
+		# if xlog is None:
+			# xlog = self._ylog
+		# if xlog:
+			# ax.set_xscale('log')
+		
+		# #set the y-axis scale
+		# if ylog is None:
+			# ylog = self._zlog
+		# if ylog:
+			# ax.set_yscale('log')
+			
+		# #set the axis labels
+		# if xparam == 'V':
+			# ax.set_xlabel(self.ylabelv)
+		# else:
+			# ax.set_xlabel(self.ylabele)
+			
+		# if yparam == 'PSD':
+			# ax.set_ylabel(self.zlabelp)
+		# else:
+			# ax.set_ylabel(self.zlabelf)
+			
+		# #turn axes off when needed
+		# if nox:
+			# ax.set_xlabel('')
+			# ax.xaxis.set_ticks([])
+		# if noy:
+			# ax.set_ylabel('')
+			# ax.yaxis.set_ticks([])
+
+
+		# if (not FitKappa is False) or (not FitMaxwellian is False) or Integrate:
+			# ylim = ax.get_ylim()
+			# ax.set_ylim(ylim)
+			
+			
+			# #get the combined spectra
+			# E,spec,_,labs = self.GetSpectrum(Date,ut,Method,Maxdt,False,'E','PSD')
+			# e = 1.6022e-19
+			# v = RelVelocity(E,self.Mass)
+		
+			# #convert to counts
+			# C = PSDtoCountsE(E,spec,self.Mass)
+
+			# #apply the threshold in keV
+			# use = np.where((E <= Erange[1]) & (E >= Erange[0]))[0]
+
+			# v = v[use]
+			# E = E[use]
+			# C = C[use]
+			# spec = spec[use]
+			
+			# if xparam == 'V':
+				# x = v
+			# else:
+				# x = E
+					
+			# #fit spectrum
+			# if (not FitKappa is False):
+				# if FitKappa is 'counts':
+					# nk,Tk,K,statk = FitKappaDistCtsE(E,C,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
+				# else:
+					# nk,Tk,K,statk = FitKappaDistE(E,spec,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
+				# fk = KappaDistE(nk,E,Tk,self.Mass,K)
+				# if yparam == 'Flux':
+					# y = PSDtoFluxE(E,fk,self.Mass)
+				# else:
+					# y = fk
+				
+				# ax.plot(x,y,color='pink',linestyle='--',label=r'Kappa Fit: $n_{\kappa}$=' + '{:5.2f}'.format(nk/1e6)+r' cm$^{-3}$,'+'\n'+'$T_{\kappa}$='+'{:5.2f}'.format(Tk/1e6)+r' MK, $\kappa$='+'{:5.1f}'.format(K))
+
+			# if (not FitMaxwellian is False):
+				# if FitMaxwellian is 'counts':
+					# nm,Tm,statm = FitMaxwellianDistCtsE(E,C,n0*1e6,T0*1e6,self.Mass,MaxIter=MaxIter)
+				# else:
+					# nm,Tm,statm = FitMaxwellianDistE(E,spec,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
+				# fm = MaxwellBoltzmannDistE(nm,E,Tm,self.Mass)
+				# if yparam == 'Flux':
+					# y = PSDtoFluxE(E,fm,self.Mass)
+				# else:
+					# y = fm
+				
+				# ax.plot(x,y,color='blue',linestyle='--',label=r'M-B Fit: $n$=' + '{:5.2f}'.format(nm/1e6)+r' cm$^{-3}$,'+'\n'+'$T$='+'{:5.2f}'.format(Tm/1e6)+r' MK')
+	
+			# if Integrate:
+				# ni = IntegrateSpectrum(E,spec,self.Mass,4*np.pi)
+				# ax.text(0.05,0.95,'$n_I$ = {:6.3f}'.format(ni[0]) + ' cm$^{-3}$',transform=ax.transAxes)
+				# print('Estimated density: {:6.3f} cm^-3'.format(ni[0]))
+	
+		# if ShowMoments:
+			
+			# moments = self.GetMoments(Date,ut,Maxdt)
+			
+			# #get appropriate field names for the hot and cold moments
+			# mom_n_c = self.SpecType + '_n_c'
+			# mom_T_c = self.SpecType + '_T_c'
+			# mom_n_h = self.SpecType + '_n_h'
+			# mom_T_h = self.SpecType + '_T_h'
+			
+			
+			
+			# R = ax.axis()
+			# ax.axis(R)
+			
+			# if xlog:
+				# x = 10**np.linspace(np.log10(R[0]),np.log10(R[1]),100)
+			# else:
+				# x = np.linspace(R[0],R[1],100)
+			
+			
+			# Ebulk = moments[0][self.SpecType+'_Ebulk']
+			# vbulk = moments[0].vbulk
+			
+			# if xparam == 'E':
+				# E = x
+				# xueff = moments[0][self.SpecType+'_Ebulk']
+			# else:
+				# E = RelEnergy(x,self.Mass)
+				# xueff = moments[0].vbulk
+			# print(xueff*3)
+			
+			# for mom in moments:
+				# #get the cold moments
+				# nc = mom[mom_n_c]
+				# Tc = mom[mom_T_c]
+				# #get the hot moments
+				# nh = mom[mom_n_h]
+				# Th = mom[mom_T_h]
+				# #calculate the scale
+				# scale = mom.ni_c/mom.ne
+				# nc*=scale
+	
+				# if np.size(Tc) == 1:
+					# Tc = np.array([Tc,Tc])
+				
+				# #calculate the distribution functions
+				# fc0 = MaxwellBoltzmannDistE(nc[0],E-Ebulk,Tc[0],self.Mass)
+				# fc1 = MaxwellBoltzmannDistE(nc[1],E-Ebulk,Tc[1],self.Mass)
+				# fh = MaxwellBoltzmannDistE(nh,E-Ebulk,Th,self.Mass)
+				
+				# #convert to flux if needed
+				# if yparam == 'Flux':
+					# fc0 = PSDtoFluxE(E,fc0,self.Mass)
+					# fc1 = PSDtoFluxE(E,fc1,self.Mass)
+					# fh = PSDtoFluxE(E,fh,self.Mass)
+				
+				
+				# ax.plot(x,fc0,color='blue',linestyle='--',label=r'$n_{c0}$=' + '{:5.2f}'.format(nc[0]/1e6)+r' cm$^{-3}$,'+'\n'+'$T_0$='+'{:5.2f}'.format(Tc[0])+r' K')
+				# ax.plot(x,fc1,color='purple',linestyle='--',label=r'$n_{c1}$=' + '{:5.2f}'.format(nc[1]/1e6)+r' cm$^{-3}$,'+'\n'+'$T_1$='+'{:5.2f}'.format(Tc[1])+r' K')
+				# ax.plot(x,fh,color='red',linestyle='--',label=r'$n_{h}$=' + '{:5.2e}'.format(nh/1e6)+r' cm$^{-3}$,'+'\n'+'$T_h$='+'{:5.2e}'.format(Th)+r' K')
+				
+			# ax.plot([xueff,xueff],[R[2],R[3]],color='cyan')
+			# ax.plot([xueff*3,xueff*3],[R[2],R[3]],color='cyan',linestyle='--')
+	
+		# ax.legend(fontsize=8)
+			
+		# return ax
+	def PlotSpectrum(self,Date,ut,Maxdt=60.0,Split=False,
 		fig=None,maps=[1,1,0,0],color=None,xlog=True,ylog=None,xparam='E',yparam='Flux',
-		FitKappa=False,FitMaxwellian=False,nox=False,noy=False,Erange=(0.0,np.inf),
-		MaxIter=None,n0=10.0,T0=100.0,Integrate=False,ShowMoments=False):
+		Fit=True,nox=False,noy=False,
+		Integrate=False,ShowMoments=False,**kwargs):
 		'''
 		This method will plot a spectrum from a given time.
 		
@@ -489,9 +928,53 @@ class PSpecCls(object):
 		'''	
 		
 		#get the spectra
-		energy,spec,err,labs = self.GetSpectrum(Date,ut,Method,Maxdt,Split,xparam,yparam)
+		inds,vel,energy,cts,flux,psd,err,labs = self.GetSpectrum(Date,ut,Maxdt,Split)
+		if np.isnan(cts).all():
+			cts = flux*energy
+			CountConst = 1.0
+		else:
+			CountConst = cts/(flux*energy)		
 		
-		
+		#get the specific bits to plot
+		if xparam.upper() == 'V':
+			x = vel
+			xlabel = 'V (m s$^{-1}$)'
+		elif xparam.upper() == 'E':
+			x = energy
+			xlabel = 'E (keV)'
+		else:
+			print('Invalid "xparam": use "E" or "V"')
+			return
+			
+		if yparam.upper() == 'PSD':
+			y = psd
+			ylabel = 'PSD (s$^3$ m$^{-6}$)'
+		elif yparam.upper() == 'PSD1D':
+			y = psd
+			if Split:
+				for i in range(0,len(y)):
+					y[i] = 4*np.pi*y[i]*vel[i]**2
+			else:
+				y = y*vel**2
+			ylabel = '$f$ (s$^1$ m$^{-4}$)'
+		elif yparam.upper() == 'PSD1Dv2':
+			y = psd
+			if Split:
+				for i in range(0,len(y)):
+					y[i] = 4*np.pi*y[i]*vel[i]**4
+			else:
+				y = y*vel**4
+			ylabel = '$fv^2$ (s$^-1$ m$^{-2}$)'	
+		elif yparam.upper() == 'FLUX':
+			y = flux
+			ylabel = 'Flux (s cm$^{2}$ sr keV)$^{-1}$'
+		elif yparam.upper() == 'COUNTS':
+			y = cts
+			ylabel = 'Counts'
+		else:
+			print('Invalid "yparam": use "PSD", "PSD1D", "PSD1Dv2", "Flux" or "Counts"')
+			return
+			
 		#create the figure
 		if fig is None:
 			fig = plt
@@ -506,20 +989,23 @@ class PSpecCls(object):
 			if not color is None:
 				nc = len(color)
 			for i in range(0,len(spec)):
-				bad = np.where((np.isfinite(spec[i]) == False) | (spec[i] == 0.0))[0]
-				spec[i][bad] = np.nan
-				if color is None:
-					#ax.plot(energy[i],spec[i],label=labs[i],marker='.')
-					ax.errorbar(energy[i],spec[i],yerr=err[i],marker='.')
+				if yparam.upper() == 'COUNTS':
+					bad = np.where((np.isfinite(y[i]) == False) | (y[i] < 0))[0]
 				else:
-					#ax.plot(energy[i],spec[i],color=color[i % nc],label=labs[i],marker='.')
-					ax.errorbar(energy[i],spec[i],yerr=err[i],color=color[i % nc],marker='.',label=labs[i])
+					bad = np.where((np.isfinite(y[i]) == False) | (y[i] == 0.0))[0]
+				y[i][bad] = np.nan
+				if color is None:
+					ax.errorbar(x[i],y[i],yerr=err[i]*y[i],marker='.')
+				else:
+					ax.errorbar(x[i],y[i],yerr=err[i]*y[i],color=color[i % nc],marker='.',label=labs[i])
 			
 		else:
-			bad = np.where((np.isfinite(spec) == False) | (spec == 0.0))[0]
-			spec[bad] = np.nan
-			#ax.plot(energy,spec,color=color,marker='.')
-			ax.errorbar(energy,spec,yerr=err,color=color,marker='.')
+			if yparam.upper() == 'COUNTS':
+				bad = np.where((np.isfinite(y) == False) | (y < 0))[0]
+			else:
+				bad = np.where((np.isfinite(y) == False) | (y == 0.0))[0]
+			y[bad] = np.nan
+			ax.errorbar(x,y,yerr=err*y,color=color,marker='.')
 
 		#set the x-axis scale
 		if xlog is None:
@@ -534,15 +1020,8 @@ class PSpecCls(object):
 			ax.set_yscale('log')
 			
 		#set the axis labels
-		if xparam == 'V':
-			ax.set_xlabel(self.ylabelv)
-		else:
-			ax.set_xlabel(self.ylabele)
-			
-		if yparam == 'PSD':
-			ax.set_ylabel(self.zlabelp)
-		else:
-			ax.set_ylabel(self.zlabelf)
+		ax.set_xlabel(xlabel)
+		ax.set_ylabel(ylabel)
 			
 		#turn axes off when needed
 		if nox:
@@ -552,91 +1031,94 @@ class PSpecCls(object):
 			ax.set_ylabel('')
 			ax.yaxis.set_ticks([])
 
+		#force y limit
+		ylim = ax.get_ylim()
+		ax.set_ylim(ylim)
 
-		if (not FitKappa is False) or (not FitMaxwellian is False) or Integrate:
-			ylim = ax.get_ylim()
-			ax.set_ylim(ylim)
+		#attempt some fitting
+		if Fit:
+			n0 = kwargs.get('n0',10.0)*1e6 #input cm^-3
+			T0 = kwargs.get('T0',1000.0)	#input K
+			FitFunction = kwargs.get('FitFunction','M-B')
+			nm,Tm,_ = self.FitSpectrum(Date,ut,Maxdt,n0,T0,FitFunction,**kwargs)
 			
 			
-			#get the combined spectra
-			E,spec,_,labs = self.GetSpectrum(Date,ut,Method,Maxdt,False,'E','PSD')
-			e = 1.6022e-19
-			v = RelVelocity(E,self.Mass)
-		
-			#convert to counts
-			C = PSDtoCountsE(E,spec,self.Mass)
-
-			#apply the threshold in keV
-			use = np.where((E <= Erange[1]) & (E >= Erange[0]))[0]
-
-			v = v[use]
-			E = E[use]
-			C = C[use]
-			spec = spec[use]
+			#calculate it
+			R = ax.axis()
+			ax.axis(R)
 			
-			if xparam == 'V':
-				x = v
-			else:
-				x = E
-					
-			#fit spectrum
-			if (not FitKappa is False):
-				if FitKappa is 'counts':
-					nk,Tk,K,statk = FitKappaDistCtsE(E,C,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
-				else:
-					nk,Tk,K,statk = FitKappaDistE(E,spec,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
-				fk = KappaDistE(nk,E,Tk,self.Mass,K)
-				if yparam == 'Flux':
-					y = PSDtoFluxE(E,fk,self.Mass)
-				else:
-					y = fk
-				
-				ax.plot(x,y,color='pink',linestyle='--',label=r'Kappa Fit: $n_{\kappa}$=' + '{:5.2f}'.format(nk/1e6)+r' cm$^{-3}$,'+'\n'+'$T_{\kappa}$='+'{:5.2f}'.format(Tk/1e6)+r' MK, $\kappa$='+'{:5.1f}'.format(K))
+			xf = x			
+			yf = Maxwellian(xf,nm,Tm,self.Mass,CountConst,xparam,yparam)
 
-			if (not FitMaxwellian is False):
-				if FitMaxwellian is 'counts':
-					nm,Tm,statm = FitMaxwellianDistCtsE(E,C,n0*1e6,T0*1e6,self.Mass,MaxIter=MaxIter)
-				else:
-					nm,Tm,statm = FitMaxwellianDistE(E,spec,n0*1e6,T0*1e6,self.Mass,Verbose=True,MaxIter=MaxIter)
-				fm = MaxwellBoltzmannDistE(nm,E,Tm,self.Mass)
-				if yparam == 'Flux':
-					y = PSDtoFluxE(E,fm,self.Mass)
-				else:
-					y = fm
-				
-				ax.plot(x,y,color='blue',linestyle='--',label=r'M-B Fit: $n$=' + '{:5.2f}'.format(nm/1e6)+r' cm$^{-3}$,'+'\n'+'$T$='+'{:5.2f}'.format(Tm/1e6)+r' MK')
+			#plot the fit
+			ax.plot(xf,yf,color='blue',linestyle='--',label=r'M-B Fit: $n$=' + '{:5.2f}'.format(nm/1e6)+r' cm$^{-3}$,'+'\n'+'$T$='+'{:5.2f}'.format(Tm)+r' K')
 	
-			if Integrate:
-				ni = IntegrateSpectrum(E,spec,self.Mass,4*np.pi)
-				ax.text(0.05,0.95,'$n_I$ = {:6.3f}'.format(ni[0]) + ' cm$^{-3}$',transform=ax.transAxes)
-				print('Estimated density: {:6.3f} cm^-3'.format(ni[0]))
+
 	
 		if ShowMoments:
 			
 			moments = self.GetMoments(Date,ut,Maxdt)
+			
+			#get appropriate field names for the hot and cold moments
+			mom_n_c = self.SpecType + '_n_c'
+			mom_T_c = self.SpecType + '_T_c'
+			mom_n_h = self.SpecType + '_n_h'
+			mom_T_h = self.SpecType + '_T_h'
+			
+			
+			
 			R = ax.axis()
 			ax.axis(R)
 			
-			if xlog:
-				x = 10**np.linspace(np.log10(R[0]),np.log10(R[1]),100)
-			else:
-				x = np.linspace(R[0],R[1],100)
+			# if xlog:
+				# x = 10**np.linspace(np.log10(R[0]),np.log10(R[1]),100)
+			# else:
+				# x = np.linspace(R[0],R[1],100)
+			# x = 
+			
+			Ebulk = moments[0][self.SpecType+'_Ebulk']
+			vbulk = moments[0].vbulk
 			
 			if xparam == 'E':
 				E = x
-				xueff = RelEnergy(moments[0].ueff,self.Mass)
+				xueff = moments[0][self.SpecType+'_Ebulk']
 			else:
 				E = RelEnergy(x,self.Mass)
-				xueff = moments[0].ueff
+				xueff = moments[0].vbulk
 			print(xueff*3)
 			
 			for mom in moments:
-				print(mom.ut)
-				f1 = MaxwellBoltzmannDistE(mom.n0*1e6,E,mom.T0*1e6,self.Mass)
-				f2 = MaxwellBoltzmannDistE(mom.nfit*1e6,E,mom.Tfit*1e6,self.Mass)
+				#get the cold moments
+				nc = mom[mom_n_c]
+				Tc = mom[mom_T_c]
+				#get the hot moments
+				nh = mom[mom_n_h]
+				Th = mom[mom_T_h]
+				#calculate the scale
+				scale = mom.ni_c/mom.ne
+				nc*=scale
+	
+				if np.size(Tc) == 1:
+					Tc = np.array([Tc,Tc])
 				
-				ax.plot(x,f1,color='grey',linestyle='--',label=r'$n_0$=' + '{:5.2f}'.format(mom.n0)+r' cm$^{-3}$,'+'\n'+'$T_0$='+'{:5.2f}'.format(mom.T0*1e6)+r' K')
-				ax.plot(x,f2,color='red',linestyle='--',label=r'$n_{fit}$=' + '{:5.2f}'.format(mom.nfit)+r' cm$^{-3}$,'+'\n'+'$T_{fit}$='+'{:5.2f}'.format(mom.Tfit*1e6)+r' K')
+				#calculate the distribution functions
+				fc0 = MaxwellBoltzmannDistE(nc[0],E-Ebulk,Tc[0],self.Mass)
+				fc1 = MaxwellBoltzmannDistE(nc[1],E-Ebulk,Tc[1],self.Mass)
+				fh = MaxwellBoltzmannDistE(nh,E-Ebulk,Th,self.Mass)
+				fc0 = Maxwellian(E-Ebulk,nc[0],Tc[0],self.Mass,CountConst,xparam,yparam)
+				fc1 = Maxwellian(E-Ebulk,nc[1],Tc[1],self.Mass,CountConst,xparam,yparam)
+				fh = Maxwellian(E-Ebulk,nh,Th,self.Mass,CountConst,xparam,yparam)
+				
+				#convert to flux if needed
+				# if yparam == 'Flux':
+					# fc0 = PSDtoFluxE(E,fc0,self.Mass)
+					# fc1 = PSDtoFluxE(E,fc1,self.Mass)
+					# fh = PSDtoFluxE(E,fh,self.Mass)
+				
+				
+				ax.plot(x,fc0,color='blue',linestyle='--',label=r'$n_{c0}$=' + '{:5.2f}'.format(nc[0]/1e6)+r' cm$^{-3}$,'+'\n'+'$T_0$='+'{:5.2f}'.format(Tc[0])+r' K')
+				ax.plot(x,fc1,color='purple',linestyle='--',label=r'$n_{c1}$=' + '{:5.2f}'.format(nc[1]/1e6)+r' cm$^{-3}$,'+'\n'+'$T_1$='+'{:5.2f}'.format(Tc[1])+r' K')
+				ax.plot(x,fh,color='red',linestyle='--',label=r'$n_{h}$=' + '{:5.2e}'.format(nh/1e6)+r' cm$^{-3}$,'+'\n'+'$T_h$='+'{:5.2e}'.format(Th)+r' K')
 				
 			ax.plot([xueff,xueff],[R[2],R[3]],color='cyan')
 			ax.plot([xueff*3,xueff*3],[R[2],R[3]],color='cyan',linestyle='--')
@@ -644,7 +1126,66 @@ class PSpecCls(object):
 		ax.legend(fontsize=8)
 			
 		return ax
+		
+		
+	def FitSpectrum(self,Date,ut,n0,T0,Maxdt,FitFunction,**kwargs):
+		'''
+		Attempt a numerical fit to a spectrum
+		
+		'''
+		if FitFunction.lower() in ['mb','m-b','maxwell-boltzmann']:
+			#define default arguments
+			LogDiff = kwargs.get('LogDiff',True)
+			Verbose = kwargs.get('Verbose',True)
+			MaxIter = kwargs.get('MaxIter',None)
+			MinFunc = kwargs.get('MinFunc','mean-squared')
+			MinFit = kwargs.get('MinFit',3)
+			Erange = kwargs.get('Erange',(0.0,0.05))
+			FitParam = kwargs.get('FitParam','PSD')
+			
+			#get the combined spectra
+			_,vel,energy,cts,flux,psd,err,_ = self.GetSpectrum(Date,ut,Maxdt,False)
 				
+			#calculate the other parameters
+			psdv2 = 4*np.pi*psd*vel**2
+			psdv4 = 4*np.pi*psd*vel**4
+
+
+			if np.isnan(cts).all():
+				cts = flux*energy
+				CountConst = 1.0
+			else:
+				CountConst = cts/(flux*energy)
+							
+			e = 1.6022e-19
+			
+			#apply the threshold in keV
+			use = np.where((energy <= Erange[1]) & (energy >= Erange[0]))[0]
+
+
+			#determine which parameter to fit to
+			spec = {	'counts' : cts,
+						'flux' : flux,
+						'psd1d' : 4*np.pi*psd*vel**2,
+						'psd1dv2' : 4*np.pi*psd*vel**4,
+						'psd' : psd, }
+			f = spec.get(FitParam.lower(),spec['psd'])
+				
+			#calculate the fit
+			if np.size(CountConst) > 1:
+				CC = CountConst[use]
+			else:
+				CC = CountConst
+			n,T,s = FitMaxwellian(energy[use],f[use],n0,T0,self.Mass,CC,
+					xparam='E',yparam=FitParam,Verbose=Verbose,
+					MaxIter=MaxIter,MinFunc=MinFunc,LogDiff=LogDiff,
+					MinFit=MinFit)
+		else:
+			n,T,s = np.nan,np.nan,False
+							
+		return n,T,s
+
+					
 		
 	def Plot(self,Date=None,ut=[0.0,24.0],fig=None,maps=[1,1,0,0],ylog=None,scale=None,zlog=None,
 			cmap='gnuplot',yparam='E',zparam='Flux',nox=False,noy=False,TickFreq='auto',PosAxis=True):

@@ -104,3 +104,139 @@ def TestIonMoments(Date=20130115,sc='a',MaxE=0.02):
 	ax7.legend()
 
 	plt.subplots_adjust(hspace=0.0)
+
+
+
+def IonMomentHist(Date,sc):
+	
+	#read the moments in
+	data = ECT.ReadIonMoments(Date,sc)
+	
+	#create a plot
+	plt.figure()
+	plt.hist(data.Mav_c[:,0],histtype='step',bins=np.linspace(1.0,16.0,60),label='$m_{avc0}$')
+	plt.hist(data.Mav_c[:,1],histtype='step',bins=np.linspace(1.0,16.0,60),label='$m_{avc1}$')
+	plt.hist(np.mean(data.Mav_c,axis=1),histtype='step',bins=np.linspace(1.0,16.0,60),label='$m_{avc}$')
+	plt.legend()
+	
+	
+	
+def _PlotRange(ax,x,y0,y1,color,label):
+	
+	ax.scatter(x,y1,s=2,color=color,label=label)
+	ax.scatter(x,y0,s=0.1,color=color)
+	
+	xf = np.append(x,x[::-1])
+	yf = np.append(y0,y1[::-1])
+	good = np.where(np.isfinite(yf))[0]
+	xf = xf[good]
+	yf = yf[good]
+	
+	fillcolor = np.append(color,[0.2])
+	ax.fill(xf,yf,color=fillcolor)
+
+def G2019f3(MaxE=0.02):
+	
+	#get the data in
+	if MaxE == 0.02:
+		data = ECT.ReadIonMoments(20130115,'a')
+	else:
+		data = ECT.CalculateIonMoments(20130115,'a',MaxE)
+	
+	#replace zeros with nan
+	fields = ['H_n_c','He_n_c','O_n_c','H_T_c','He_T_c','O_T_c',]
+	for f in fields:
+		use = np.where(data[f] == 0)[0]
+		data[f][use] = np.nan
+	
+	#get the quantities we need
+	
+	#electrons and ions
+	ut = data.ut
+	ne = data.ne/1e6
+	ni = data.ni_c/1e6
+	
+	#scale factor
+	scale = ni/ne
+	
+	#original ion densities
+	Hn0 = data.H_n_c[:,0]*scale/1e6
+	Hen0 = data.He_n_c[:,0]*scale/1e6
+	On0 = data.O_n_c[:,0]*scale/1e6
+	
+	#new ion densities
+	Hn_a = data.H_n_c[:,0]/1e6
+	Hn_b = data.H_n_c[:,1]/1e6
+	Hen_a = data.He_n_c[:,0]/1e6
+	Hen_b = data.He_n_c[:,1]/1e6
+	On_a = data.O_n_c[:,0]/1e6
+	On_b = data.O_n_c[:,1]/1e6
+	
+	#oxygen temp
+	kB = np.float64(1.38064852e-23)
+	e = np.float64(1.6022e-19)
+	OTl = data.O_T_c[:,0]*kB/e
+	OTh = data.O_T_c[:,1]*kB/e
+	
+	
+	#mav
+	mav0 = np.nanmin(data.Mav_c,axis=1)
+	mav1 = np.nanmax(data.Mav_c,axis=1)
+	
+	#Energy
+	Emin = data.Emin*1e3
+	H_Eb = data.H_Ebulk*1e3
+	He_Eb = data.He_Ebulk*1e3
+	O_Eb = data.O_Ebulk*1e3
+		
+	#create the figure
+	fig = plt
+	fig.figure(figsize=(11,10))
+	plt.subplots_adjust(hspace=0.0)
+	
+	#Top plot
+	ax0 = fig.subplot2grid((9,1),(0,0),rowspan=3)
+	ax0.set_xlim(0.0,4.867)
+	ax0.set_ylim(0.002,5000)
+	ax0.scatter(ut,ne,s=2.0,color=[0.0,0.0,0.0],label='$n_e$')
+	ax0.scatter(ut,Hn0,s=2.0,color=[1.0,0.0,0.0],label='$n_{H+}$')
+	ax0.scatter(ut,Hen0,s=2.0,color=[0.0,1.0,0.0],label='$n_{He+}$')
+	ax0.scatter(ut,On0,s=2.0,color=[0.0,1.0,1.0],label='$n_{O+}$')
+	_PlotRange(ax0,ut,OTl,OTh,[1.0,0.0,1.0],'$T_{O+}$')
+	ax0.set_yscale('log')
+	ax0.set_xticklabels(['']*len(ax0.get_xticklabels()))
+	ax0.set_ylabel('cm$^{-3}$ or eV')
+	ax0.legend(loc='upper right')
+
+	#bottom plot
+	ax1 = fig.subplot2grid((9,1),(3,0),rowspan=2)
+	ax1.set_xlim(0.0,4.867)
+	ax1.set_ylim(0.1,5000)
+	ax1.scatter(ut,ne,s=2.0,color=[0.0,0.0,0.0],label='$n_e$')
+	ax1.scatter(ut,Hn_a,s=2.0,color=[1.0,0.0,0.0],label='$n_{H+}$')
+	ax1.scatter(ut,Hen_a,s=2.0,color=[0.0,1.0,0.0],label='$n_{He+}$')
+	_PlotRange(ax1,ut,On_b,On_a,[0.0,1.0,1.0],'$n_{O+}$')
+	ax1.set_yscale('log')
+	ax1.set_xticklabels(['']*len(ax1.get_xticklabels()))
+	ax1.set_ylabel('cm$^{-3}$')
+	ax1.legend(loc='upper right')
+	
+	#extra plot: Emin,Emax,E_Bulk
+	ax2 = fig.subplot2grid((9,1),(5,0),rowspan=2)
+	ax2.set_xlim(0.0,4.867)
+	ax2.scatter(ut,Emin,s=2.0,color=[0.0,0.0,0.0],label='$E_{min}$')
+	ax2.scatter(ut,H_Eb,s=2.0,color=[1.0,0.0,0.0],label='$E_{bulk}$ (H$^+$)')
+	ax2.scatter(ut,He_Eb,s=2.0,color=[0.0,1.0,0.0],label='$E_{bulk}$ (He$^+$)')
+	ax2.scatter(ut,O_Eb,s=2.0,color=[0.0,1.0,1.0],label='$E_{bulk}$ (O$^+$)')	
+	ax2.set_xticklabels(['']*len(ax1.get_xticklabels()))
+	ax2.legend(loc='upper right')
+	ax2.set_ylabel('eV')
+	
+	#extra plot: Mav
+	ax3 = fig.subplot2grid((9,1),(7,0),rowspan=2)
+	_PlotRange(ax3,ut,mav0,mav1,[1.0,0.5,0.0],'$m_{av}$')
+	ax3.set_ylim(1.0,16.0)
+	ax3.set_xlim(0.0,4.867)
+	ax3.legend(loc='upper right')
+	ax3.set_ylabel('amu')
+

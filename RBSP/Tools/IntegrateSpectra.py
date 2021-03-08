@@ -2,7 +2,7 @@ import numpy as np
 from .RelVelocity import RelVelocity
 from .RelEnergy import RelEnergy
 
-def IntegrateSpectra(E,E0,E1,Flux,m,Omega,Vsc,Vbulk,Erange=(0.0,np.inf)):
+def IntegrateSpectra(E,E0,E1,Flux,m,Omega,Vsc,Vbulk,Erange=(0.0,np.inf),nmin=3):
 	'''
 	Integrate fluxes in units of (keV sr cm^2 s)^-1 to calculate the 
 	density, pressure and temperature in units of m^-3, Pa and K,
@@ -68,14 +68,15 @@ def IntegrateSpectra(E,E0,E1,Flux,m,Omega,Vsc,Vbulk,Erange=(0.0,np.inf)):
 	Ve = RelVelocity(E+Vsck,m) - Vbulk
 	Ve0 = RelVelocity(E0+Vsck,m) - Vbulk
 	Ve1 = RelVelocity(E1+Vsck,m) - Vbulk
-	Ea = RelEnergy(Ve,m)*1000.0*e
-	Ea0 = RelEnergy(Ve0,m)*1000.0*e
-	Ea1 = RelEnergy(Ve1,m)*1000.0*e
+	Ea = RelEnergy(Ve + Vbulk,m)*1000.0*e
+	Ea0 = RelEnergy(Ve0 + Vbulk,m)*1000.0*e
+	Ea1 = RelEnergy(Ve1 + Vbulk,m)*1000.0*e
 	
 	#convert Erange to joules from keV
 	Er = np.array(Erange)*e*1000.0
 	
 	#calculate the width of the energy bin
+	Emid = 0.5*(E0 + E1)*e*1000.0
 	dEE = np.float64((E1-E0)/E)
 	
 	#convert Flux to SI units
@@ -83,12 +84,13 @@ def IntegrateSpectra(E,E0,E1,Flux,m,Omega,Vsc,Vbulk,Erange=(0.0,np.inf)):
 	J = J/e # divide by electron charge to go from eV^-1 to J^-1
 	
 	#now both sets of sums
-	Sn = np.zeros(J.shape[0],dtype='float32')
-	Sp = np.zeros(J.shape[0],dtype='float32')
+	Sn = np.zeros(J.shape[0],dtype='float32') + np.nan
+	Sp = np.zeros(J.shape[0],dtype='float32') + np.nan
 	for i in range(0,J.shape[0]):
-		use = np.where((Ea[i] >= Er[0]) & (Ea[i] <= Er[1]))[0]
-		Sn[i] = np.sum(np.sqrt(Ea[i][use])*dEE[i][use]*np.float64(J[i][use]))
-		Sp[i] = np.sum((Ea[i][use]**1.5)*dEE[i][use]*np.float64(J[i][use]))
+		use = np.where((Emid[i] >= Er[0]) & (Emid[i] <= Er[1]))[0]
+		if use.size > nmin:
+			Sn[i] = np.sum(np.sqrt(Ea[i][use])*dEE[i][use]*np.float64(J[i][use]))
+			Sp[i] = np.sum((Ea[i][use]**1.5)*dEE[i][use]*np.float64(J[i][use]))
 	
 	#calculate density (m^-3)
 	n = Omega*np.sqrt(m/2)*Sn
