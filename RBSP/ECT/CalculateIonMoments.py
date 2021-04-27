@@ -32,10 +32,19 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	sO = spec['O+Flux']
 	moms,_ = ReadCDF(Date,sc,'hope','l3.moments')
 	
+	#check that both moments and spectra align
+	ts = sH.utc[0]
+	tm = TT.ContUT(*TT.CDFEpochtoDate(moms['Epoch_Ion']))
+	if ts.size == tm.size:
+		inds = np.arange(ts.size)
+	else:
+		inds = np.array([np.where(ts == tm[i])[0][0] for i in range(tm.size)])
+	
 	#create output arrays
 	print('Creating output array')
 	ns = spec['H+Flux'].utc[0].size
 	out = np.recarray(ns,dtype=_ECT.idtype)
+	out.fill(np.nan)
 
 	#copy some fields across
 	print('Copying Fields')
@@ -43,21 +52,21 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	out.ut = spec['H+Flux'].ut[0]
 	out.utc = spec['H+Flux'].utc[0]
 	
-	out.H_n_h = moms['Dens_p_30']*1e6
-	out.H_T_hpar = moms['Tpar_p_30']*eVtoK
-	out.H_T_hperp = moms['Tperp_p_30']*eVtoK
+	out.H_n_h[inds] = moms['Dens_p_30']*1e6
+	out.H_T_hpar[inds] = moms['Tpar_p_30']*eVtoK
+	out.H_T_hperp[inds] = moms['Tperp_p_30']*eVtoK
 	out.H_T_h = (out.H_T_hpar + 2.0*out.H_T_hperp)/3.0
 	out.H_p_h = kB*out.H_T_h*out.H_n_h
 	
-	out.He_n_h = moms['Dens_he_30']*1e6
-	out.He_T_hpar = moms['Tpar_he_30']*eVtoK
-	out.He_T_hperp = moms['Tperp_he_30']*eVtoK
+	out.He_n_h[inds] = moms['Dens_he_30']*1e6
+	out.He_T_hpar[inds] = moms['Tpar_he_30']*eVtoK
+	out.He_T_hperp[inds] = moms['Tperp_he_30']*eVtoK
 	out.He_T_h = (out.He_T_hpar + 2.0*out.He_T_hperp)/3.0
 	out.He_p_h = kB*out.He_T_h*out.He_n_h
 	
-	out.O_n_h = moms['Dens_o_30']*1e6
-	out.O_T_hpar = moms['Tpar_o_30']*eVtoK
-	out.O_T_hperp = moms['Tperp_o_30']*eVtoK
+	out.O_n_h[inds] = moms['Dens_o_30']*1e6
+	out.O_T_hpar[inds] = moms['Tpar_o_30']*eVtoK
+	out.O_T_hperp[inds] = moms['Tperp_o_30']*eVtoK
 	out.O_T_h = (out.O_T_hpar + 2.0*out.O_T_hperp)/3.0
 	out.O_p_h = kB*out.O_T_h*out.O_n_h
 	

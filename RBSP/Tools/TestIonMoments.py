@@ -122,18 +122,41 @@ def IonMomentHist(Date,sc):
 	
 	
 def _PlotRange(ax,x,y0,y1,color,label):
+	'''
+	This will plot a shaded area between a range of values.
 	
+	'''
 	ax.scatter(x,y1,s=2,color=color,label=label)
 	ax.scatter(x,y0,s=0.1,color=color)
+
+
+	good = np.where(np.isfinite(y0))[0]
+	xf = x[good]
+	yf0 = y0[good]
+	yf1 = y1[good]
+
 	
-	xf = np.append(x,x[::-1])
-	yf = np.append(y0,y1[::-1])
-	good = np.where(np.isfinite(yf))[0]
-	xf = xf[good]
-	yf = yf[good]
+	#find gaps
+	maxgap = 5/60.0
+	dt = xf[1:] - xf[:-1]
+	gaps = np.where(dt > maxgap)[0]
+	if gaps.size == 0:
+		i0 = np.array([0])
+		i1 = np.array([xf.size])
+	else:
+		i0 = np.append(0,gaps+1)
+		i1 = np.append(gaps+1,xf.size)
+	ni = i0.size
+
 	
-	fillcolor = np.append(color,[0.2])
-	ax.fill(xf,yf,color=fillcolor)
+	for i in range(0,ni):
+		inds = np.arange(i0[i],i1[i])
+
+		xp = np.append(xf[inds],xf[inds][::-1])
+		yp = np.append(yf0[inds],yf1[inds][::-1])		
+		fillcolor = np.append(color,[0.2])
+		ax.fill(xp,yp,color=fillcolor)
+
 
 def G2019f3(MaxE=0.02):
 	
@@ -191,7 +214,7 @@ def G2019f3(MaxE=0.02):
 		
 	#create the figure
 	fig = plt
-	fig.figure(figsize=(11,10))
+	fig.figure(figsize=(8,11))
 	plt.subplots_adjust(hspace=0.0)
 	
 	#Top plot
@@ -240,3 +263,4 @@ def G2019f3(MaxE=0.02):
 	ax3.legend(loc='upper right')
 	ax3.set_ylabel('amu')
 
+	plt.savefig('G2019f3-{:05.3f}.png'.format(MaxE))

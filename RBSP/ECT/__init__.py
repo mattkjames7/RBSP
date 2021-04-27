@@ -1,6 +1,6 @@
 from .DownloadData import DownloadData
 from .ReadCDF import ReadCDF
-from .PlotMoments import PlotMoments
+from .PlotMoments import PlotMoments,PlotDensity,PlotTemp,PlotMav
 from .DataAvailability import DataAvailability
 from .DeleteDate import DeleteDate
 from .RebuildDataIndex import RebuildDataIndex

@@ -955,16 +955,16 @@ class PSpecCls(object):
 				for i in range(0,len(y)):
 					y[i] = 4*np.pi*y[i]*vel[i]**2
 			else:
-				y = y*vel**2
+				y = 4*np.pi*y*vel**2
 			ylabel = '$f$ (s$^1$ m$^{-4}$)'
-		elif yparam.upper() == 'PSD1Dv2':
+		elif yparam.upper() == 'PSD1DV2':
 			y = psd
 			if Split:
 				for i in range(0,len(y)):
-					y[i] = 4*np.pi*y[i]*vel[i]**4
+					y[i] = self.Mass*4*np.pi*y[i]*vel[i]**4
 			else:
-				y = y*vel**4
-			ylabel = '$fv^2$ (s$^-1$ m$^{-2}$)'	
+				y = self.Mass*4*np.pi*y*vel**4
+			ylabel = '$mfv^2$ (kg s$^-1$ m$^{-2}$)'	
 		elif yparam.upper() == 'FLUX':
 			y = flux
 			ylabel = 'Flux (s cm$^{2}$ sr keV)$^{-1}$'
@@ -1148,7 +1148,7 @@ class PSpecCls(object):
 				
 			#calculate the other parameters
 			psdv2 = 4*np.pi*psd*vel**2
-			psdv4 = 4*np.pi*psd*vel**4
+			psdv4 = self.Mass*4*np.pi*psd*vel**4
 
 
 			if np.isnan(cts).all():
@@ -1167,7 +1167,7 @@ class PSpecCls(object):
 			spec = {	'counts' : cts,
 						'flux' : flux,
 						'psd1d' : 4*np.pi*psd*vel**2,
-						'psd1dv2' : 4*np.pi*psd*vel**4,
+						'psd1dv2' : self.Mass*4*np.pi*psd*vel**4,
 						'psd' : psd, }
 			f = spec.get(FitParam.lower(),spec['psd'])
 				

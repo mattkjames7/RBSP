@@ -59,7 +59,7 @@ def _MB_psdv4(E,n,T,m,CountConst=1.0):
 	#now velocity
 	v = RelVelocity(E,m)
 
-	return 4*np.pi*f*v**4
+	return m*4*np.pi*f*v**4
 
 def _MB_flux(E,n,T,m,CountConst=1.0):
 	'''
