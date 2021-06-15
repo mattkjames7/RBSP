@@ -8,3 +8,5 @@ from .IntegrateFluxes import IntegrateFluxesDensity,IntegrateFluxesPressure,Inte
 from . import TestSpectrum
 from .TestIntegrate import TestIntegrate
 from .TestIonMoments import TestIonMoments,IonMomentHist,G2019f3
+from .ConvertTime import ConvertTime
+from .GSMtoDipolar import GSMtoDipolar,GSMtoDipolar2,_RotationMatrix

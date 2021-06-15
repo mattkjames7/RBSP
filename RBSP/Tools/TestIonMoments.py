@@ -175,7 +175,8 @@ def G2019f3(MaxE=0.02):
 	#get the quantities we need
 	
 	#electrons and ions
-	ut = data.ut
+	utlim = TT.ContUT(np.array([20130115,20130115]),np.array([0.0,4.867]))
+	ut = data.utc
 	ne = data.ne/1e6
 	ni = data.ni_c/1e6
 	
@@ -219,7 +220,7 @@ def G2019f3(MaxE=0.02):
 	
 	#Top plot
 	ax0 = fig.subplot2grid((9,1),(0,0),rowspan=3)
-	ax0.set_xlim(0.0,4.867)
+	ax0.set_xlim(utlim)
 	ax0.set_ylim(0.002,5000)
 	ax0.scatter(ut,ne,s=2.0,color=[0.0,0.0,0.0],label='$n_e$')
 	ax0.scatter(ut,Hn0,s=2.0,color=[1.0,0.0,0.0],label='$n_{H+}$')
@@ -233,7 +234,7 @@ def G2019f3(MaxE=0.02):
 
 	#bottom plot
 	ax1 = fig.subplot2grid((9,1),(3,0),rowspan=2)
-	ax1.set_xlim(0.0,4.867)
+	ax1.set_xlim(utlim)
 	ax1.set_ylim(0.1,5000)
 	ax1.scatter(ut,ne,s=2.0,color=[0.0,0.0,0.0],label='$n_e$')
 	ax1.scatter(ut,Hn_a,s=2.0,color=[1.0,0.0,0.0],label='$n_{H+}$')
@@ -246,7 +247,7 @@ def G2019f3(MaxE=0.02):
 	
 	#extra plot: Emin,Emax,E_Bulk
 	ax2 = fig.subplot2grid((9,1),(5,0),rowspan=2)
-	ax2.set_xlim(0.0,4.867)
+	ax2.set_xlim(utlim)
 	ax2.scatter(ut,Emin,s=2.0,color=[0.0,0.0,0.0],label='$E_{min}$')
 	ax2.scatter(ut,H_Eb,s=2.0,color=[1.0,0.0,0.0],label='$E_{bulk}$ (H$^+$)')
 	ax2.scatter(ut,He_Eb,s=2.0,color=[0.0,1.0,0.0],label='$E_{bulk}$ (He$^+$)')
@@ -259,8 +260,9 @@ def G2019f3(MaxE=0.02):
 	ax3 = fig.subplot2grid((9,1),(7,0),rowspan=2)
 	_PlotRange(ax3,ut,mav0,mav1,[1.0,0.5,0.0],'$m_{av}$')
 	ax3.set_ylim(1.0,16.0)
-	ax3.set_xlim(0.0,4.867)
+	ax3.set_xlim(utlim)
 	ax3.legend(loc='upper right')
 	ax3.set_ylabel('amu')
+	TT.DTPlotLabel(ax3)
 
 	plt.savefig('G2019f3-{:05.3f}.png'.format(MaxE))
