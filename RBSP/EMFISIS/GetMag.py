@@ -3,6 +3,31 @@ import DateTimeTools as TT
 from .ReadCDF import ReadCDF
 from ._MagRecarray import _MagRecarray
 from .DataAvailability import DataAvailability
+from ..Pos import GetPos
+from scipy.interpolate import interp1d
+
+def _MagPos(Date,sc,utc,Coord='GSM'):
+	
+	#get the position
+	pos = GetPos(sc)
+	date0 = TT.MinusDay(np.min(Date))
+	date1 = TT.PlusDay(np.max(Date))
+	use = np.where((pos.Date >= date0) & (pos.Date <= date1))[0]
+	pos = pos[use]
+	
+	#get the field names
+	fields = ['x','y','z']
+	out = [] 
+	for f in fields:
+		pf = f.upper() + Coord.lower()
+		p0 = pos[pf]
+		fp = interp1d(pos.utc,p0,fill_value='extrapolate',bounds_error=False)
+		p1 = fp(utc)
+		out.append(p1)
+	
+	return out
+	
+
 
 def GetMag(Date,sc,ut=[0.0,24.0],Coord='GSM',Res='1sec'):
 	'''
@@ -59,6 +84,9 @@ def GetMag(Date,sc,ut=[0.0,24.0],Coord='GSM',Res='1sec'):
 	dtype = [	('Date','int32'),
 				('ut','float32'),
 				('utc','float64'),
+				('x','float64'),
+				('y','float64'),
+				('z','float64'),
 				('Bx','float64'),
 				('By','float64'),
 				('Bz','float64'),
@@ -82,5 +110,8 @@ def GetMag(Date,sc,ut=[0.0,24.0],Coord='GSM',Res='1sec'):
 	utc0 = TT.ContUT(dates[0],ut[0])[0]
 	utc1 = TT.ContUT(dates[-1],ut[1])[0]
 	use = np.where(( data.utc >= utc0) & (data.utc <= utc1))[0]
+	
+	#get the position
+	data.x,data.y,data.z = _MagPos(dates,sc,data.utc,Coord)
 	
 	return data[use]

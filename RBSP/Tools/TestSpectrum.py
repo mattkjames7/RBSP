@@ -5,7 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ..ECT.ReadHOPEOmni import ReadHOPEOmni
 import DateTimeTools as TT
 from . import TestSpec
-from ..EFW.GetPotential import GetPotential
+
 from scipy.interpolate import interp1d
 import pyomnidata
 import kpindex
@@ -215,6 +215,7 @@ def PlotSpectrum(E,psd,Flux,err,utc,Mass,sc='a',vrnge=None,prnge=None,fig=None,m
 		time of spectrum
 	
 	'''
+	from ..EFW.GetPotential import GetPotential
 	e = 1.602e-19
 	kB = 1.381e-23
 
