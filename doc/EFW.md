@@ -13,7 +13,7 @@ The full documentation for this instrument can be found in Wygant et al., 2013.
 | `RebuildDataIndex()`    | Scan the downloaded data and rebuild the index file.                    |
 | `GetPotential()`		  | Get the spacecraft potential.											|
 | `SavePotentials()`	  | Save spacecraft potentials for all dates.								|
-| `ReadElectronDensity()` | Read the electron density calculated using UHR.							|
+| `ReadElectronDensity()` | Read the electron density calculated using spacecraft potential.		|
 
 ## Downloading Data
 
@@ -54,7 +54,7 @@ where `Date` may be a single date, a range of dates or a list of specific dates 
 
 ## Electron Density
 
-The electron densities as measured using the upper hybrid resonance can be obtained using the `ReadElectronDensity()` function, which is a wrapper for the `ReadCDF()` function, e.g.:
+The electron densities as measured using the spacecraft potential can be obtained using the `ReadElectronDensity()` function, which is a wrapper for the `ReadCDF()` function, e.g.:
 
 ```python
 data = RBSP.EFW.ReadElectronDensity(Date,sc)
