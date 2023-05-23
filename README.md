@@ -11,7 +11,7 @@ pip3 install wheel --user
 
 Clone this repo, build and install (swap x.x.x for the current version):
 ```bash
-git clone git@github.com:mattkjames7/RBSP.git
+git clone https://github.com/mattkjames7/RBSP.git
 cd RBSP
 
 #build the wheel
