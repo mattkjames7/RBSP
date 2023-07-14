@@ -36,7 +36,10 @@ mdtype = [	('Date','int32'),		#Date in the format yyyymmdd
 idtype = [	('Date','int32'),			#Date in the format yyyymmdd
 			('ut','float32'),			#time since start of day in hours
 			('utc','float64'),			#continuous time
-			('vbulk','float32'),		#Effective velocity (v_ExB - u_sc)
+			('vbulk','float32'),		#Effective velocity (v_ExB - u_sc) magnitude
+            ('vbulkx','float32'),		#Effective velocity (v_ExB - u_sc)
+            ('vbulky','float32'),		#Effective velocity (v_ExB - u_sc)
+            ('vbulkz','float32'),		#Effective velocity (v_ExB - u_sc)
 			('H_Ebulk','float32'),		# bulk energy, keV
 			('He_Ebulk','float32'),		# bulk energy, keV
 			('O_Ebulk','float32'),		# bulk energy, keV

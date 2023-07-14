@@ -176,10 +176,17 @@ def CalculateIonMoments(Date,sc,MaxE=0.02):
 	vz = np.float64(exb.mVzExB - exb.Vz)
 	ueff = np.sqrt(vx**2 + vy**2 + vz**2)
 	fueff = interp1d(exb.utc,ueff,fill_value=(ueff[0],ueff[-1]),bounds_error=False)	
+	fvx = interp1d(exb.utc,vx,fill_value=(vx[0],vx[-1]),bounds_error=False)	
+	fvy = interp1d(exb.utc,vy,fill_value=(vy[0],vy[-1]),bounds_error=False)	
+	fvz = interp1d(exb.utc,vz,fill_value=(vz[0],vz[-1]),bounds_error=False)	
+
 	
 	#calculate bulk velocity and spacecraft potential
 	print('Calculating bulk velocity and spacecraft potential')
 	out.vbulk = fueff(out.utc)
+	out.vbulkx = fvx(out.utc)
+	out.vbulky = fvy(out.utc)
+	out.vbulkz = fvz(out.utc)
 	out.H_Ebulk = RelEnergy(out.vbulk,_ECT.mass['H'])
 	out.He_Ebulk = RelEnergy(out.vbulk,_ECT.mass['He'])
 	out.O_Ebulk = RelEnergy(out.vbulk,_ECT.mass['O'])
